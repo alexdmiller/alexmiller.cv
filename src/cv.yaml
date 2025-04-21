@@ -1,0 +1,414 @@
+works:
+  - title: <em>Clock Poem</em>
+    description: experimental clocks
+    location: <em>Strange Time</em>, SOIL gallery, Seattle
+    date: 2025
+
+  - title: <em>Century-Scale Storage</em>
+    url: https://lil.law.harvard.edu/century-scale-storage/
+    description: web editorial design
+    location: Library Innovation Lab, Harvard Law School
+    date: 2024
+    collaborators:
+      - <a href="https://shelby.cool">Shelby Wilson</a>
+
+  - title: <em>Game of Hope</em>
+    url: https://alex.miller.garden/game-of-hope
+    description: essay
+    location: |
+      [The HTML Review](https://thehtml.review), Issue 3
+    date: 2024
+
+  - title: Generative blankets
+    description: jacquard woven throws
+    location: sold online
+    date: 2023
+
+  - title: <em>Spiral Living Wall</em>
+    description: installation
+    location: Lab Test 002, Seattle
+    date: 2023
+
+  - title: <em>Zig Zag</em>
+    description: installation
+    location: XO Seattle, Seattle
+    date: 2023
+    collaborators:
+      - Alex Nagy
+      - <a href="https://mkmarchan.github.io/">Mick Marchan</a>
+
+  - title: <em>Grid World</em>
+    url: https://alex.miller.garden/grid-world/
+    description: essay
+    location: |
+      [The HTML Review](https://thehtml.review), Issue 2
+    date: 2023
+
+  - title: <em>Living Wall</em>
+    description: installation
+    location: The Museum of Digital Experiences, Brooklyn
+    date: 2022
+
+  - title: <em>Cellular automata</em>
+    description: installation
+    location: The Understory, Amazon Spheres, Seattle
+    date: 2022
+
+  - title: <em>Living Sign</em>
+    url: https://www.saveartspace.org/cosmicshift
+    description: |
+      large scale billboard print
+    location: |
+      [Save Art Space](https://www.saveartspace.org/cosmicshift), LA
+    date: 2022
+
+  - title: <em>Petri Dish</em>
+    url: https://notes.spacefiller.space/petridish/
+    description: |
+      installation
+    location: |
+      [Museum of Museums](https://www.museumofmuseums.com/), Seattle
+    collaborators:
+      - Alex Nagy
+      - <a href="https://mkmarchan.github.io/">Mick Marchan</a>
+    date: 2022
+
+  - title: <em>spaceplant</em>
+    url: https://www.fxhash.xyz/generative/10282
+    location: |
+      [fxhash.xyz](https://www.fxhash.xyz)
+    description: |
+      collectible digital work
+    date: 2022
+
+  - title: Generative prints
+    url: https://spacefiller.space/prints/
+    description: |
+      generative poster series
+    location: sold online
+    date: 2021
+
+  - title: <em>Interplanetery Maze</em>
+    url: https://vimeo.com/648358646
+    description: |
+      animations and album cover
+    location: |
+      [NIHILS](https://www.nihils.com/)
+    date: 2021
+
+  - title: <em>Feedback Crystals</em>
+    url: https://www.fxhash.xyz/generative/542
+    location: |
+      [fxhash.xyz](https://www.fxhash.xyz)
+    description: |
+      collectible digital work
+    date: 2021
+
+  - title: Untitled laserwire sculpture
+    description: installation
+    date: 2020
+    location: Kremwerk, Seattle
+  - title: <em>Fantasy Parameter Spaces</em>
+    url: https://spacefiller.space/fantasy-parameter-spaces/
+    description: |
+      exhibit
+    location: Glass Box Gallery, Seattle
+    date: 2019
+    collaborators:
+      - Alex Nagy
+      - <a href="https://mkmarchan.github.io/">Mick Marchan</a>
+      - <a href="https://peterwhidden.webflow.io/">Peter Whidden</a>
+  - title: <em>Petri-panels</em>
+    description: installation
+    location: Seattle Art Museum Sculpture Park
+    date: 2019
+    collaborators:
+      - Alex Nagy
+      - <a href="https://mkmarchan.github.io/">Mick Marchan</a>
+  - title: <em>ALGOPLEX I</em>
+    description: installation
+    location: Seattle Art Museum Sculpture Park
+    date: 2019
+    collaborators:
+      - Alex Nagy
+      - <a href="https://mkmarchan.github.io/">Mick Marchan</a>
+  - title: <em>The Emergence and Decay of Computation</em>
+    url: https://vimeo.com/336939272
+    location: Showcase, School for Poetic Computation
+    description: installation
+    date: 2019
+  - title: Henry Art Gallery Gala
+    description: projection
+    location: Henry Art Gallery
+    date: 2019
+    collaborators:
+      - Alex Nagy
+
+  - title: <em>Living Wall</em>
+    url: https://spacefiller.space/livingwall/
+    description: installation
+    location: |
+      [Vida apartment building](https://g.page/vida-apartments-seattle?share), Seattle
+    date: 2018
+    collaborators:
+      - <a href="https://peterwhidden.webflow.io/">Peter Whidden</a>
+  - title: <em>X</em>
+    description: installation
+    location: Borealis Festival, Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+  - title: Rave installations
+    description: installation
+    location: |
+      [secondnature](https://secondnatureseattle.com/) in Seattle
+    collaborators:
+      - Alex Nagy
+    date: 2018
+  - title: <em>Fluids</em>
+    description: installation
+    location: |
+      [Photographic Center Northwest](https://pcnw.org/), Seattle
+    collaborators:
+      - <a href="https://peterwhidden.webflow.io/">Peter Whidden</a>
+    date: 2018
+  - title: <em>X / Void</em>
+    description: installation
+    location: festival:festival in Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+      - <a href="https://peterwhidden.webflow.io/">Peter Whidden</a>
+  - title: <em>High Top-ography</em>
+    url: https://spacefiller.space/mooyoung/
+    description: installation
+    location: Moo Young Concept Shop, Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+  - title: <em>Spacefillers</em>
+    description: |
+      installation
+    location: Specialist Gallery, Seattle
+    collaborators:
+      - Alex Nagy
+    date: 2018
+  - title: Generative visuals for guided meditation
+    description: visuals
+    location: Pause, NYC
+    date: 2018
+  - title: <em>Algo-cacti</em>
+    description: installation
+    location: |
+      Volunteer Park Conservatory, Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+  - title: <em>ALGOPLEX II</em>
+    description: installation
+    location: Hoedemaker Pfeiffer Gallery, Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+  - title: <em>ALGOPLEX I</em>
+    description: installation
+    location: Lusio Light Festival, Seattle
+    date: 2017
+    collaborators:
+      - Alex Nagy
+  - title: Visuals for Shaprece
+    description: music visuals
+    location: Seattle Symphony, Benaroya Hall
+    date: 2015
+
+talks:
+  - title: <em>Grid World</em> reading
+    description: reading
+    location: CultureHub, La Mama, NYC
+    date: 2023
+
+  - title: Artist talk
+    description: guest lecture
+    location: |
+      [ITP](https://tisch.nyu.edu/itp), NYU
+    date: 2023
+
+  - title: Algorithmic Botany
+    description: co-lecturer
+    location: School for Poetic Computation, NYC
+    date: 2023
+    collaborators:
+      - <a href="https://catangui.com/">Sean Catangui</a>
+
+  - title: Chaos Theory
+    description: talk
+    location: Processing Community Day, NYC
+    date: 2022
+
+  - title: Wordhack
+    description: presentation
+    location: Babycastles, NYC
+    date: 2019
+
+  - title: Recreating the Past
+    description: teaching assistant
+    location: School for Poetic Computation, NYC
+    date: 2019
+    collaborators:
+      - <a href="https://www.media.mit.edu/people/zachl/overview/">Zach Lieberman</a>
+
+  - title: On the Edge of Chaos
+    description: talk
+    location: Algorithmic Art Assembly, Gray Area, SF
+    date: 2019
+    collaborators:
+      - Alex Nagy
+
+  - title: <em>Spacefillers</em> artist talk
+    description: artist talk
+    location: Specialist/Mount Analogue, Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+
+  - title: |
+      "Light Work" featured artist talk
+    description: featured artist talk
+    location: MOKEDO, Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+
+  - title: <em>ALGOPLEX II</em> artist talk
+    description: artist talk
+    location: Hoedemaker Pfeiffer Gallery, Seattle
+    date: 2017
+    collaborators:
+      - Alex Nagy
+
+  - title: <em>Exploration Sessions</em>
+    description: lectures
+    location: University of Washington, Seattle
+    date: 2016
+
+awards:
+  - title: Webby
+    date: 2025
+    description: nomination
+  - title: Tiny Awards
+    date: 2023
+    description: nomination
+  - title: Artist trust grant
+    url: https://artisttrust.org/artists/alexander-miller/
+    date: 2018
+    description: grant
+
+performance:
+  - title: <em>Untitled A/V performance</em>
+    url: https://www.youtube.com/watch?v=9FtllU-cCx0
+    description: |
+      a/v performance
+    location: |
+      [Algorithmic Art Assembly](https://aaassembly.org/), SF
+    date: 2022
+    collaborators:
+      - <a href="https://mkmarchan.github.io/">Mick Marchan</a>
+
+  - title: <em>Under Construction</em>
+    description: |
+      web-based performance
+    location: |
+      [Laboratory](https://laboratoryspokane.com/) residency
+    date: 2021
+    collaborators:
+      - <a href="https://shelby.cool">Shelby Wilson</a>
+      - Max Cerami
+      - <a href="https://5tephen.com/">Steve Geluso</a>
+
+  - title: Noisey/Vice Halloween Party
+    description: live visuals
+    location: NYC
+    date: 2019
+
+  - title: Morgxn & WALK THE MOON
+    description: live visuals
+    location: Jimmy Kimmel Live!
+    date: 2019
+    collaborators:
+      - <a href="https://www.yoyolin.com/">Yo-Yo Lin</a>
+
+  - title: Lusio Light Festival
+    description: live visuals
+    location: Volunteer Park, Seattle
+    date: 2018
+    collaborators:
+      - Alex Nagy
+
+  - title: Sloucher visuals
+    description: live visuals
+    location: Sasquatch! Music Festival
+    date: 2017
+    collaborators:
+      - Alex Nagy
+
+  - title: Henry Gala
+    description: live visuals
+    location: Henry Art Gallery, Seattle
+    date: 2017
+
+  - title: Sonic Evolution&#58; Under the Influence of Jazz
+    description: live visuals
+    location: Benaroya Hall
+    date: 2015
+
+press:
+  - title: various coverage of <em>Grid World</em> essay
+    description: press coverage
+    location: daringfireball.net, kottke.org, waxy.org
+    date: 2023
+
+  - title: "Making web art the hard way"
+    description: podcast interview
+    location: JS Party podcast
+    date: 2023
+
+  - title: "spaceplant"
+    description: featured digital artwork
+    location: CreativeApplications.net
+    date: 2022
+
+  - title: "Tactile Sculptures of Light and Sound"
+    description: press coverage
+    location: The Stranger
+    date: 2019
+
+  - title: "The Top 10 Pioneer Square Art Shows to Check Out in September"
+    description: press coverage
+    location: The Stranger
+    date: 2019
+
+  - title: "School for Poetic Computation Spring 2019 Student Showcase"
+    description: press coverage
+    location: CreativeApplications.net
+    date: 2019
+
+  - title: "Borealis&#58; a 'magical, light, beautiful' art event in South Lake Union"
+    description: press coverage
+    location: The Seattle Times
+    date: 2018
+
+  - title: "Seattle artists light up nights, bring people together"
+    description: press coverage
+    location: The Seattle Times
+    date: 2018
+
+  - title: "The Line Rules at Hoedemaker Pfeiffer Gallery's Adjunct Appendages"
+    description: press coverage
+    location: Vanguard Seattle
+    date: 2017
+
+curation:
+  - title: Poetic Computation&#58; Seven Years of School for Poetic Computation
+    description: exhibition
+    location: Westbeth Gallery, NYC
+    date: 2020

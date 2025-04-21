@@ -1,0 +1,4 @@
+```
+npm install
+node build-cv.js src/cv.yaml > output.html; open output.html
+```

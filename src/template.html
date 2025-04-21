@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alex Miller</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      margin: 0;
+    }
+
+    h1,
+    h2 {
+      font-size: 1em;
+    }
+
+    #top {
+      border-bottom: 1px solid #000;
+      background-color: white;
+      padding: 0;
+      margin: 0;
+      position: fixed;
+      top: 0;
+      display: block;
+      width: 100%;
+      z-index: 100;
+    }
+
+    #top {
+      display: flex;
+    }
+
+    #top ul {
+      margin: 0;
+    }
+
+    #top li {
+      display: inline;
+      margin-right: 1em;
+    }
+
+    #top a:link,
+    #top a:visited {
+      color: blue;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    #top a:hover {
+      color: black;
+    }
+
+    h1 {
+      margin: 0;
+      padding: 0;
+
+    }
+
+    h2 {
+      padding: 1.2em 0 0 0;
+      position: sticky;
+      top: 0;
+      background: white;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    /* Fix nested items issue */
+    .item .item {
+      display: contents;
+    }
+
+    /* Simple mobile breakpoint */
+    @media (max-width: 768px) {
+      .item {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: blue;
+    }
+
+    .item::before {
+      content: "";
+      position: absolute;
+      height: 1px;
+      background-color: #e9e9e9;
+      z-index: -100;
+      display: block;
+      width: 100%;
+      margin: 0.5em 0 0 0;
+    }
+
+    .item:hover::before {
+      background-color: black;
+      /* Line changes to red on hover */
+    }
+
+    .item span {
+      background-color: white;
+      padding: 0 1em;
+    }
+
+    .item-date span {
+      padding-left: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="top">
+    <h1>Alex Miller</h1>
+
+    <ul>
+      <li><a href="">cv</a></li>
+      <li><a href="">projects</a></li>
+      <li><a href="">gallery</a></li>
+      <li><a href="">contact</a></li>
+    </ul>
+
+  </div>
+  {content}
+</body>
+
+</html>
