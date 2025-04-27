@@ -2,3 +2,9 @@
 npm install
 node build-cv.js src/cv.yaml > output.html; open output.html
 ```
+
+TODO
+- just organized files into appropriate places, need to update scripts so they will output the correct paths etc.
+- Also need to copy the contents of the gallery into the build folder.
+- Figure out how to use google drive to publish (use the API?)
+
