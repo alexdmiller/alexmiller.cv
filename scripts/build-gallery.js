@@ -14,9 +14,8 @@ const access = promisify(fs.access);
 const execPromise = promisify(exec);
 
 // Configuration
-const THUMBNAIL_SIZE = 250; // Max dimension of thumbnails in pixels
-const THUMBNAIL_DIR = "thumbnails"; // Directory to store thumbnails
-const VIDEO_DIR = "videos"; // Directory to store converted videos
+const THUMBNAIL_SIZE = 400; // Max dimension of thumbnails in pixels
+const OUTPUT_DIR = "output/gallery"; // Main output directory
 const WEB_COMPATIBLE_VIDEO_EXTS = [".mp4", ".webm", ".ogg"];
 const VIDEO_EXTS = [
   ...WEB_COMPATIBLE_VIDEO_EXTS,
@@ -67,10 +66,6 @@ async function convertVideo(inputPath, outputPath) {
 
   try {
     // Convert to MP4 with H.264 codec, optimize for streaming
-    // -movflags faststart moves metadata to beginning of file for faster streaming
-    // -crf 23 is a good balance of quality and file size
-    // -preset fast provides good encoding speed and compression
-    // -an removes audio
     await execPromise(
       `ffmpeg -i "${inputPath}" -c:v libx264 -crf 23 -preset fast -an -movflags faststart "${outputPath}"`
     );
@@ -86,16 +81,10 @@ async function generateGallery(sourceDir, outputFile) {
   // Check if FFmpeg is installed
   const ffmpegAvailable = await checkFFmpeg();
 
-  // Create required directories
-  const thumbnailPath = path.join(process.cwd(), THUMBNAIL_DIR);
-  const videoPath = path.join(process.cwd(), VIDEO_DIR);
-
-  for (const dir of [thumbnailPath, videoPath]) {
-    try {
-      await stat(dir);
-    } catch (err) {
-      await mkdir(dir, { recursive: true });
-    }
+  // Create output directory for HTML file
+  const outputDir = path.dirname(outputFile);
+  if (!(await fileExists(outputDir))) {
+    await mkdir(outputDir, { recursive: true });
   }
 
   // Get all directories in the source folder
@@ -146,10 +135,17 @@ async function generateGallery(sourceDir, outputFile) {
       // Process images
       if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
         // Create thumbnail for image
-        const thumbnailFilename = `${dir.name}-${file}`;
-        const thumbnailPath = path.join(THUMBNAIL_DIR, thumbnailFilename);
+        const thumbnailFilename = `${file}.thumb.jpg`;
+        const thumbnailPath = path.join(
+          OUTPUT_DIR,
+          dir.name,
+          thumbnailFilename
+        );
 
         try {
+          // Ensure directory exists
+          await mkdir(path.dirname(thumbnailPath), { recursive: true });
+
           // Check if thumbnail already exists
           const thumbnailExists = await fileExists(thumbnailPath);
 
@@ -160,42 +156,50 @@ async function generateGallery(sourceDir, outputFile) {
             await sharp(filePath)
               .resize({
                 width: THUMBNAIL_SIZE,
-                height: THUMBNAIL_SIZE,
                 fit: sharp.fit.inside, // Preserve aspect ratio
                 withoutEnlargement: true, // Don't enlarge small images
               })
               .toFile(thumbnailPath);
           }
 
+          // Copy original file to output directory
+          const outputImagePath = path.join(OUTPUT_DIR, dir.name, file);
+          await fs.promises.copyFile(filePath, outputImagePath);
+
           // Add image with thumbnail that links to original
           html += `
             <div class="gallery-item">
-              <a href="${filePath}" target="_blank">
-                <img src="${thumbnailPath}" alt="${file}">
+              <a href="${dir.name}/${file}" target="_blank">
+                <img src="${dir.name}/${thumbnailFilename}" alt="${file}">
               </a>
             </div>`;
         } catch (err) {
           console.error(`Error with thumbnail for ${filePath}: ${err.message}`);
           // Fallback to original image if thumbnail creation fails
-          html += `<div class="gallery-item"><img src="${filePath}" alt="${file}"></div>`;
+          html += `<div class="gallery-item"><img src="${dir.name}/${file}" alt="${file}"></div>`;
         }
       }
       // Process videos
       else if (VIDEO_EXTS.includes(ext)) {
         // Check if video needs conversion
-        let videoSrc = filePath;
+        let videoSrc = `${dir.name}/${file}`;
         let videoType = `video/${ext.substring(1)}`;
 
         // If video is not web-compatible and FFmpeg is available, convert it
         if (!WEB_COMPATIBLE_VIDEO_EXTS.includes(ext) && ffmpegAvailable) {
-          const outputFilename = `${dir.name}-${path.basename(file, ext)}.mp4`;
-          const outputPath = path.join(VIDEO_DIR, outputFilename);
+          const outputFilename = `${path.basename(file, ext)}.mp4`;
+          const outputPath = path.join(OUTPUT_DIR, dir.name, outputFilename);
 
           const convertedPath = await convertVideo(filePath, outputPath);
           if (convertedPath) {
-            videoSrc = convertedPath;
+            videoSrc = `${dir.name}/${outputFilename}`;
             videoType = "video/mp4";
           }
+        } else {
+          // Copy original video to output directory if it's web-compatible
+          const outputVideoPath = path.join(OUTPUT_DIR, dir.name, file);
+          await mkdir(path.dirname(outputVideoPath), { recursive: true });
+          await fs.promises.copyFile(filePath, outputVideoPath);
         }
 
         html += `
@@ -213,7 +217,7 @@ async function generateGallery(sourceDir, outputFile) {
 
   // Main function
   try {
-    const templatePath = path.resolve(process.cwd(), "template.html");
+    const templatePath = path.resolve(process.cwd(), "src/template.html");
     let templateHtml;
 
     try {
@@ -236,8 +240,8 @@ async function generateGallery(sourceDir, outputFile) {
 }
 
 // Run the function
-const sourceDirectory = "gallery"; // Change this to your actual source directory
-const outputFile = "gallery.html";
+const sourceDirectory = "src/gallery"; // Source directory containing all media
+const outputFile = "output/gallery/index.html"; // Output HTML file
 
 generateGallery(sourceDirectory, outputFile).catch((err) => {
   console.error("Error generating gallery:", err);
