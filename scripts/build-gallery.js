@@ -15,7 +15,7 @@ const execPromise = promisify(exec);
 
 // Configuration
 const THUMBNAIL_SIZE = 400; // Max dimension of thumbnails in pixels
-const OUTPUT_DIR = "output/gallery"; // Main output directory
+const OUTPUT_BASE_DIR = "output/gallery"; // Base output directory
 const WEB_COMPATIBLE_VIDEO_EXTS = [".mp4", ".webm", ".ogg"];
 const VIDEO_EXTS = [
   ...WEB_COMPATIBLE_VIDEO_EXTS,
@@ -77,14 +77,14 @@ async function convertVideo(inputPath, outputPath) {
   }
 }
 
-async function generateGallery(sourceDir, outputFile) {
+async function generateGallery(sourceDir, outputDir, outputFile) {
   // Check if FFmpeg is installed
   const ffmpegAvailable = await checkFFmpeg();
 
   // Create output directory for HTML file
-  const outputDir = path.dirname(outputFile);
-  if (!(await fileExists(outputDir))) {
-    await mkdir(outputDir, { recursive: true });
+  const outputFileDir = path.dirname(outputFile);
+  if (!(await fileExists(outputFileDir))) {
+    await mkdir(outputFileDir, { recursive: true });
   }
 
   // Get all directories in the source folder
@@ -136,11 +136,7 @@ async function generateGallery(sourceDir, outputFile) {
       if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
         // Create thumbnail for image
         const thumbnailFilename = `${file}.thumb.jpg`;
-        const thumbnailPath = path.join(
-          OUTPUT_DIR,
-          dir.name,
-          thumbnailFilename
-        );
+        const thumbnailPath = path.join(outputDir, dir.name, thumbnailFilename);
 
         try {
           // Ensure directory exists
@@ -163,7 +159,7 @@ async function generateGallery(sourceDir, outputFile) {
           }
 
           // Copy original file to output directory
-          const outputImagePath = path.join(OUTPUT_DIR, dir.name, file);
+          const outputImagePath = path.join(outputDir, dir.name, file);
           await fs.promises.copyFile(filePath, outputImagePath);
 
           // Add image with thumbnail that links to original
@@ -188,7 +184,7 @@ async function generateGallery(sourceDir, outputFile) {
         // If video is not web-compatible and FFmpeg is available, convert it
         if (!WEB_COMPATIBLE_VIDEO_EXTS.includes(ext) && ffmpegAvailable) {
           const outputFilename = `${path.basename(file, ext)}.mp4`;
-          const outputPath = path.join(OUTPUT_DIR, dir.name, outputFilename);
+          const outputPath = path.join(outputDir, dir.name, outputFilename);
 
           const convertedPath = await convertVideo(filePath, outputPath);
           if (convertedPath) {
@@ -197,7 +193,7 @@ async function generateGallery(sourceDir, outputFile) {
           }
         } else {
           // Copy original video to output directory if it's web-compatible
-          const outputVideoPath = path.join(OUTPUT_DIR, dir.name, file);
+          const outputVideoPath = path.join(outputDir, dir.name, file);
           await mkdir(path.dirname(outputVideoPath), { recursive: true });
           await fs.promises.copyFile(filePath, outputVideoPath);
         }
@@ -239,10 +235,36 @@ async function generateGallery(sourceDir, outputFile) {
   }
 }
 
-// Run the function
-const sourceDirectory = "src/gallery"; // Source directory containing all media
-const outputFile = "output/gallery/index.html"; // Output HTML file
+// Run the function for both directories
+async function generateBothGalleries() {
+  const galleries = [
+    {
+      sourceDir: "src/gallery/finished",
+      outputDir: path.join(OUTPUT_BASE_DIR, "finished"),
+      outputFile: path.join(OUTPUT_BASE_DIR, "finished", "index.html"),
+    },
+    {
+      sourceDir: "src/gallery/in-progress",
+      outputDir: path.join(OUTPUT_BASE_DIR, "in-progress"),
+      outputFile: path.join(OUTPUT_BASE_DIR, "in-progress", "index.html"),
+    },
+  ];
 
-generateGallery(sourceDirectory, outputFile).catch((err) => {
-  console.error("Error generating gallery:", err);
+  for (const gallery of galleries) {
+    console.log(`\nGenerating gallery for ${gallery.sourceDir}...`);
+    try {
+      await generateGallery(
+        gallery.sourceDir,
+        gallery.outputDir,
+        gallery.outputFile
+      );
+    } catch (err) {
+      console.error(`Error generating gallery for ${gallery.sourceDir}:`, err);
+    }
+  }
+}
+
+// Execute the generation
+generateBothGalleries().catch((err) => {
+  console.error("Error generating galleries:", err);
 });
