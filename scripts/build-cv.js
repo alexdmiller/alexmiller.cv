@@ -8,13 +8,14 @@
 const fs = require("fs");
 const path = require("path");
 const yaml = require("js-yaml");
+const { promisify } = require("util");
+
+const writeFile = promisify(fs.writeFile);
+
 // Check if input file was provided
-const inputFile = process.argv[2];
-if (!inputFile) {
-  console.error("Error: No input file specified");
-  console.error("Usage: node yaml-to-html.js input.yaml > output.html");
-  process.exit(1);
-}
+const inputFile = "src/cv.yaml";
+const outputFile = "output/cv.html";
+
 // Read the input file
 let yamlContent;
 try {
@@ -94,25 +95,30 @@ function generateHtml(data) {
   });
   return html;
 }
-// Main function
-try {
-  // Parse YAML using js-yaml library
-  const parsedData = yaml.load(yamlContent);
-  const contentHtml = generateHtml(parsedData);
-  // Read the template file
-  const templatePath = path.resolve(process.cwd(), "src/template.html");
-  let templateHtml;
+
+async function main() {
+  // Main function
   try {
-    templateHtml = fs.readFileSync(templatePath, "utf8");
+    // Parse YAML using js-yaml library
+    const parsedData = yaml.load(yamlContent);
+    const contentHtml = generateHtml(parsedData);
+    // Read the template file
+    const templatePath = path.resolve(process.cwd(), "src/template.html");
+    let templateHtml;
+    try {
+      templateHtml = fs.readFileSync(templatePath, "utf8");
+    } catch (error) {
+      console.error(`Error reading template file: ${error.message}`);
+      process.exit(1);
+    }
+    // Replace content placeholder with generated content
+    const finalHtml = templateHtml.replace("{content}", contentHtml);
+    await writeFile(outputFile, finalHtml);
+    console.log(`CV generated at ${outputFile}`);
   } catch (error) {
-    console.error(`Error reading template file: ${error.message}`);
+    console.error(`Error processing YAML: ${error.message}`);
     process.exit(1);
   }
-  // Replace content placeholder with generated content
-  const finalHtml = templateHtml.replace("{content}", contentHtml);
-  // Output the HTML to stdout
-  console.log(finalHtml);
-} catch (error) {
-  console.error(`Error processing YAML: ${error.message}`);
-  process.exit(1);
 }
+
+main();

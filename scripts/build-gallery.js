@@ -113,7 +113,7 @@ async function generateGallery(sourceDir, outputFile) {
 
   // Process each directory
   for (const dir of directories) {
-    html += `<section id="${dir.name}">`;
+    html += `<section class="gallery-section" id="${dir.name}">`;
 
     // Check if markdown file exists
     const files = await readdir(dir.path);
