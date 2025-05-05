@@ -4,6 +4,7 @@ const { promisify } = require("util");
 const { exec } = require("child_process");
 const marked = require("marked"); // For markdown parsing
 const sharp = require("sharp"); // For image processing
+const yaml = require("js-yaml"); // For parsing YAML files
 
 const readdir = promisify(fs.readdir);
 const stat = promisify(fs.stat);
@@ -77,12 +78,56 @@ async function convertVideo(inputPath, outputPath) {
   }
 }
 
+// Read and parse description.yaml if it exists
+async function getDirectoryInfo(dirPath) {
+  const descriptionFile = path.join(dirPath, "description.yaml");
+
+  try {
+    // Check if description.yaml exists
+    if (await fileExists(descriptionFile)) {
+      const yamlContent = await readFile(descriptionFile, "utf8");
+      const data = yaml.load(yamlContent);
+      return {
+        title: data.title || path.basename(dirPath),
+        description: data.description || "",
+      };
+    }
+  } catch (err) {
+    console.error(
+      `Error reading description.yaml in ${dirPath}: ${err.message}`
+    );
+  }
+
+  // Default to directory name if no valid description.yaml
+  return {
+    title: path.basename(dirPath),
+    description: "",
+  };
+}
+
 // Generate individual HTML page for a media file
 async function generateMediaPage(mediaInfo, dirName, galleryType, outputDir) {
   const { fileName, mediaPath, mediaType, prev, next } = mediaInfo;
 
   // Create content HTML for the media page
-  let mediaContent = `<div class="media-container">`;
+  let mediaContent = "";
+
+  mediaContent += `<div class="media-container">`;
+
+  mediaContent += `
+    <div class="back-to-gallery"><a href="../index.html" class="back">Back to Gallery</a></div>`;
+
+  mediaContent += `<div class="row">`;
+  mediaContent += `<div class="previous">`;
+
+  if (prev) {
+    mediaContent += `
+    <a href="${prev}" class="prev">Previous</a>`;
+  }
+
+  mediaContent += `</div>`;
+
+  mediaContent += `<div class="inner-media-container">`;
 
   // Add the appropriate media element
   if (mediaType === "image") {
@@ -96,27 +141,18 @@ async function generateMediaPage(mediaInfo, dirName, galleryType, outputDir) {
     </video>`;
   }
 
-  // Add navigation links
-  mediaContent += `
-  </div>
-  <div class="navigation">`;
+  mediaContent += `</div>`;
 
-  if (prev) {
-    mediaContent += `
-    <a href="${prev}" class="prev">Previous</a>`;
-  }
-
-  // Back link to the gallery index
-  mediaContent += `
-    <a href="../index.html" class="back">Back to Gallery</a>`;
+  mediaContent += `<div class="next">`;
 
   if (next) {
     mediaContent += `
     <a href="${next}" class="next">Next</a>`;
   }
 
-  mediaContent += `
-  </div>`;
+  mediaContent += `</div>`;
+  mediaContent += `</div>`;
+  mediaContent += `</div>`;
 
   // Get the template HTML
   const templatePath = path.resolve(process.cwd(), "src/template.html");
@@ -239,9 +275,20 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
 
   // Process each directory section
   for (const dir of directories) {
+    // Get directory info from description.yaml if available
+    const dirInfo = await getDirectoryInfo(dir.path);
+
     // Create a section for this directory
     html += `<section class="gallery-section" id="${dir.name}">`;
-    html += `<h2>${dir.name}</h2>`;
+
+    html += `<div class="description">`;
+    html += `<h2>${dirInfo.title}</h2>`;
+
+    if (dirInfo.description) {
+      html += marked.parse(dirInfo.description);
+    }
+
+    html += `</div>`;
 
     html += `<div class="thumbnails">`;
 

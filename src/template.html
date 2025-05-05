@@ -133,20 +133,23 @@
 
     .gallery-section {
       display: flex;
-      border-bottom: 1px solid #e9e9e9;
+      /* border-bottom: 1px solid #e9e9e9; */
       margin-bottom: 1em;
       padding-bottom: 1em;
     }
 
     .gallery-section h2 {
       padding: 0;
-      margin: 0;
-      min-width: 30ch;
-      width: 30ch;
-      flex-shrink: 0;
     }
 
-    .gallery-section>div {
+    .gallery-section>.description {
+      min-width: 40ch;
+      width: 40ch;
+      flex-shrink: 0;
+      padding-right: 1em;
+    }
+
+    .gallery-section>.thumbnails {
       display: flex;
       flex-wrap: wrap;
     }
@@ -187,6 +190,80 @@
       display: block;
       width: 100%;
       height: 100%;
+    }
+
+    .media-container {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .back-to-gallery {
+      padding: 10px;
+      flex: 0 0 auto;
+      /* Fixed size, won't grow or shrink */
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex: 1;
+      /* Take up all remaining space */
+      width: 100%;
+    }
+
+    .previous,
+    .next {
+      flex: 0 0 auto;
+      /* Fixed size */
+      padding: 0 20px;
+      min-width: 80px;
+      /* Give enough space for navigation text */
+      text-align: center;
+    }
+
+    .inner-media-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex: 1;
+      /* Take up remaining space */
+      padding: 20px;
+      height: calc(100vh - 60px);
+      /* Calculate height excluding nav areas */
+    }
+
+    .inner-media-container img,
+    .inner-media-container video {
+      max-width: calc(100vw - 240px);
+      /* Viewport width minus navigation areas */
+      max-height: calc(100vh - 100px);
+      /* Viewport height minus header/nav areas */
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Prevent page scrolling */
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Adjustments for the top navbar */
+    #top {
+      flex: 0 0 auto;
+      z-index: 101;
+    }
+
+    /* Ensure content starts below fixed header */
+    .media-container {
+      padding-top: 30px;
+      /* Adjust based on your header height */
     }
   </style>
 </head>
