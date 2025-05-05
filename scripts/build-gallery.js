@@ -87,6 +87,9 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
     await mkdir(outputFileDir, { recursive: true });
   }
 
+  // Start building HTML
+  let html = ``;
+
   // Get all directories in the source folder
   const items = await readdir(sourceDir);
   const directories = [];
@@ -108,28 +111,22 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
   // Sort directories by modified time
   directories.sort((a, b) => b.modifiedTime - a.modifiedTime);
 
-  // Start building HTML
-  let html = ``;
-
   // Process each directory
   for (const dir of directories) {
+    // Create a section for this directory
     html += `<section class="gallery-section" id="${dir.name}">`;
+    html += `<h2>${dir.name}</h2>`;
 
-    // Check if markdown file exists
+    html += `<div class="thumbnails">`;
+
+    // Process all files in the directory
     const files = await readdir(dir.path);
-    const mdFile = files.find(
-      (file) => path.extname(file).toLowerCase() === ".md"
-    );
 
-    if (mdFile) {
-      const mdContent = await readFile(path.join(dir.path, mdFile), "utf8");
-      const htmlContent = marked.parse(mdContent);
-      html += `<div class="description">${htmlContent}</div>`;
-    }
-
-    // Add images and videos
+    // Skip markdown files and process only media files
     for (const file of files) {
       const ext = path.extname(file).toLowerCase();
+      if (ext === ".md") continue; // Skip markdown files
+
       const filePath = path.join(sourceDir, dir.name, file);
 
       // Process images
@@ -208,6 +205,7 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
       }
     }
 
+    html += `</div>`;
     html += `</section>`;
   }
 
