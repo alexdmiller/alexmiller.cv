@@ -107,25 +107,31 @@ async function getDirectoryInfo(dirPath) {
 
 // Generate individual HTML page for a media file
 async function generateMediaPage(mediaInfo, dirName, galleryType, outputDir) {
-  const { fileName, mediaPath, mediaType, prev, next } = mediaInfo;
+  const {
+    fileName,
+    mediaPath,
+    mediaType,
+    prev,
+    next,
+    dirTitle,
+    dirDescription,
+  } = mediaInfo;
 
   // Create content HTML for the media page
   let mediaContent = "";
 
-  mediaContent += `<div class="media-container">`;
-
-  mediaContent += `
-    <div class="back-to-gallery"><a href="../index.html" class="back">Back to Gallery</a></div>`;
-
   mediaContent += `<div class="row">`;
-  mediaContent += `<div class="previous">`;
 
+  mediaContent += `<div class="previous">`;
   if (prev) {
     mediaContent += `
-    <a href="${prev}" class="prev">Previous</a>`;
+    <a href="${prev}">Previous</a>`;
   }
-
   mediaContent += `</div>`;
+
+  mediaContent += `<div class="media-container">`;
+  mediaContent += `
+    <div class="back-to-gallery"><a href="../index.html" class="back">Back to Gallery</a></div>`;
 
   mediaContent += `<div class="inner-media-container">`;
 
@@ -143,15 +149,31 @@ async function generateMediaPage(mediaInfo, dirName, galleryType, outputDir) {
 
   mediaContent += `</div>`;
 
-  mediaContent += `<div class="next">`;
-
-  if (next) {
+  // Add the directory title and description below the media
+  if (dirTitle || dirDescription) {
     mediaContent += `
-    <a href="${next}" class="next">Next</a>`;
+    <div class="media-description">`;
+
+    if (dirTitle) {
+      mediaContent += `<h2>${dirTitle}</h2>`;
+    }
+
+    if (dirDescription) {
+      mediaContent += marked.parse(dirDescription);
+    }
+
+    mediaContent += `</div>`;
   }
 
   mediaContent += `</div>`;
+
+  mediaContent += `<div class="next">`;
+  if (next) {
+    mediaContent += `
+    <a href="${next}">Next</a>`;
+  }
   mediaContent += `</div>`;
+
   mediaContent += `</div>`;
 
   // Get the template HTML
@@ -235,6 +257,9 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
     // Sort media files
     mediaFiles.sort();
 
+    // Get directory info from description.yaml
+    const dirInfo = await getDirectoryInfo(dir.path);
+
     // Add each media file to the overall list
     for (let i = 0; i < mediaFiles.length; i++) {
       const file = mediaFiles[i];
@@ -249,6 +274,8 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
         originalFile: file,
         extension: ext,
         htmlFile: htmlFileName,
+        dirTitle: dirInfo.title,
+        dirDescription: dirInfo.description,
       });
     }
   }
@@ -357,6 +384,8 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
             mediaType: "image",
             prev: item.prev,
             next: item.next,
+            dirTitle: item.dirTitle,
+            dirDescription: item.dirDescription,
           };
 
           await generateMediaPage(
@@ -410,6 +439,8 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
           mediaType: "video",
           prev: item.prev,
           next: item.next,
+          dirTitle: item.dirTitle,
+          dirDescription: item.dirDescription,
         };
 
         await generateMediaPage(

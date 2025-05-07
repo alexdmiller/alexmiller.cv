@@ -200,7 +200,7 @@
     }
 
     .back-to-gallery {
-      padding: 10px;
+      padding-top: 50px;
       flex: 0 0 auto;
       /* Fixed size, won't grow or shrink */
     }
@@ -217,11 +217,57 @@
     .previous,
     .next {
       flex: 0 0 auto;
-      /* Fixed size */
-      padding: 0 20px;
-      min-width: 80px;
-      /* Give enough space for navigation text */
+      min-width: 100px;
       text-align: center;
+      height: 100%;
+    }
+
+    .previous a,
+    .next a {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      /* Stack content vertically */
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      /* Remove underline from the entire link */
+    }
+
+    .previous a span,
+    .next a span {
+      display: block;
+      margin-bottom: 5px;
+      /* Space between text and arrow */
+    }
+
+    /* Add arrows as pseudo-elements */
+    .previous a::after,
+    .next a::after {
+      content: "";
+      display: block;
+      font-size: 2em;
+      line-height: 1;
+    }
+
+    .previous a::after {
+      content: "⟵";
+    }
+
+    .next a::after {
+      content: "⟶";
+    }
+
+    /* Optional: Style for hover state */
+    .previous a:hover,
+    .next a:hover {
+      color: blue;
+    }
+
+    /* This ensures only the text gets underlined on hover, not the arrow */
+    .previous a:hover span,
+    .next a:hover span {
+      text-decoration: underline;
     }
 
     .inner-media-container {
@@ -250,8 +296,6 @@
     html {
       margin: 0;
       padding: 0;
-      height: 100%;
-      overflow: hidden;
     }
 
     /* Adjustments for the top navbar */
