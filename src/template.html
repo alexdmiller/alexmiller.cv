@@ -73,6 +73,11 @@
       background: white;
     }
 
+    #top {
+      flex: 0 0 auto;
+      z-index: 101;
+    }
+
     .item {
       display: grid;
       grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
@@ -192,53 +197,32 @@
       height: 100%;
     }
 
-    .media-container {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100vh;
-    }
-
-    .back-to-gallery {
-      padding-top: 50px;
-      flex: 0 0 auto;
-      /* Fixed size, won't grow or shrink */
-    }
-
     .row {
       display: flex;
-      align-items: center;
+      height: 100vh;
       justify-content: space-between;
-      flex: 1;
-      /* Take up all remaining space */
-      width: 100%;
     }
 
     .previous,
     .next {
-      flex: 0 0 auto;
-      min-width: 100px;
-      text-align: center;
-      height: 100%;
+      width: 200px;
+      flex-shrink: 0;
     }
 
     .previous a,
     .next a {
+      text-decoration: none;
+      text-align: center;
       height: 100%;
+      width: 200px;
       display: flex;
       flex-direction: column;
-      /* Stack content vertically */
       align-items: center;
       justify-content: center;
-      text-decoration: none;
-      /* Remove underline from the entire link */
     }
 
-    .previous a span,
-    .next a span {
-      display: block;
-      margin-bottom: 5px;
-      /* Space between text and arrow */
+    .back-to-gallery a {
+      text-decoration: none;
     }
 
     /* Add arrows as pseudo-elements */
@@ -264,50 +248,56 @@
       color: blue;
     }
 
-    /* This ensures only the text gets underlined on hover, not the arrow */
-    .previous a:hover span,
-    .next a:hover span {
-      text-decoration: underline;
+    .back-to-gallery,
+    .media-description {
+      text-align: center;
+      flex: 0 0 auto;
+    }
+
+    .back-to-gallery {
+      padding: 2em 0 1em 0;
+    }
+
+    .back-to-gallery a::before {
+      content: "↑";
+      display: block;
+      font-size: 2em;
+      line-height: 1.5;
+      text-decoration: none;
+    }
+
+    .media-container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     .inner-media-container {
+      flex: 1 1 auto;
+      /* Grow and shrink as needed */
+      overflow: auto;
+      /* Allow scrolling within if content is too large */
       display: flex;
       justify-content: center;
       align-items: center;
-      flex: 1;
-      /* Take up remaining space */
-      padding: 20px;
-      height: calc(100vh - 60px);
-      /* Calculate height excluding nav areas */
     }
 
     .inner-media-container img,
     .inner-media-container video {
-      max-width: calc(100vw - 240px);
-      /* Viewport width minus navigation areas */
-      max-height: calc(100vh - 100px);
-      /* Viewport height minus header/nav areas */
+      max-height: 100%;
+      max-width: 100%;
       object-fit: contain;
-      display: block;
     }
 
-    /* Prevent page scrolling */
-    body,
-    html {
-      margin: 0;
-      padding: 0;
+    .media-description {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2em;
     }
 
-    /* Adjustments for the top navbar */
-    #top {
-      flex: 0 0 auto;
-      z-index: 101;
-    }
-
-    /* Ensure content starts below fixed header */
-    .media-container {
-      padding-top: 30px;
-      /* Adjust based on your header height */
+    .media-description h2 {
+      padding: 1em 0;
     }
   </style>
 </head>
