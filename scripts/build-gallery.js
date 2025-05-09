@@ -1,3 +1,4 @@
+// Configuration
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
@@ -12,10 +13,15 @@ const readFile = promisify(fs.readFile);
 const writeFile = promisify(fs.writeFile);
 const mkdir = promisify(fs.mkdir);
 const access = promisify(fs.access);
+const unlink = promisify(fs.unlink); // For deleting files
+const rmdir = promisify(fs.rmdir); // For deleting directories
 const execPromise = promisify(exec);
 
-// Configuration
-const THUMBNAIL_SIZE = 400; // Max dimension of thumbnails in pixels
+const THUMBNAIL_SIZE = 600; // Max dimension of thumbnails in pixels (increased for higher quality)
+
+// Parse command line arguments
+const args = process.argv.slice(2);
+const REGENERATE_THUMBNAILS = args.includes("--regenerate-thumbnails");
 const OUTPUT_BASE_DIR = "output/gallery"; // Base output directory
 const WEB_COMPATIBLE_VIDEO_EXTS = [".mp4", ".webm", ".ogg"];
 const VIDEO_EXTS = [
@@ -130,8 +136,14 @@ async function generateMediaPage(mediaInfo, dirName, galleryType, outputDir) {
   mediaContent += `</div>`;
 
   mediaContent += `<div class="media-container">`;
-  mediaContent += `
-    <div class="back-to-gallery"><a href="../index.html" class="back">Back to Gallery</a></div>`;
+
+  if (galleryType === "in-progress") {
+    mediaContent += `
+    <div class="back-to-gallery"><a href="../index.html" class="back">Back to in-progress gallery</a></div>`;
+  } else {
+    mediaContent += `
+    <div class="back-to-gallery"><a href="../index.html" class="back">Back to gallery</a></div>`;
+  }
 
   mediaContent += `<div class="inner-media-container">`;
 
@@ -203,6 +215,162 @@ async function generateMediaPage(mediaInfo, dirName, galleryType, outputDir) {
   }
 }
 
+// NEW FUNCTION: Recursively delete a directory and its contents
+async function deleteDirectoryRecursive(dirPath) {
+  if (!(await fileExists(dirPath))) {
+    return;
+  }
+
+  try {
+    const files = await readdir(dirPath);
+    for (const file of files) {
+      const filePath = path.join(dirPath, file);
+      const fileStats = await stat(filePath);
+
+      if (fileStats.isDirectory()) {
+        await deleteDirectoryRecursive(filePath);
+      } else {
+        await unlink(filePath);
+        console.log(`Deleted file: ${filePath}`);
+      }
+    }
+
+    await rmdir(dirPath);
+    console.log(`Deleted directory: ${dirPath}`);
+  } catch (err) {
+    console.error(`Error deleting directory ${dirPath}: ${err.message}`);
+  }
+}
+
+// NEW FUNCTION: Delete files in output that no longer exist in source
+async function cleanupOutputDirectory(srcDir, outputDir) {
+  try {
+    // Check if output directory exists
+    if (!(await fileExists(outputDir))) {
+      return; // Nothing to clean up
+    }
+
+    // Get all directories in source
+    const srcItems = await readdir(srcDir);
+    const srcDirs = [];
+
+    for (const item of srcItems) {
+      const itemPath = path.join(srcDir, item);
+      const itemStat = await stat(itemPath);
+
+      if (itemStat.isDirectory()) {
+        srcDirs.push(item);
+      }
+    }
+
+    // Get all directories in output
+    const outputItems = await readdir(outputDir);
+    const outputDirs = [];
+
+    for (const item of outputItems) {
+      const itemPath = path.join(outputDir, item);
+      const itemStat = await stat(itemPath);
+
+      if (itemStat.isDirectory()) {
+        outputDirs.push(item);
+      }
+    }
+
+    // Delete output directories that no longer exist in source
+    for (const outputDir of outputDirs) {
+      if (!srcDirs.includes(outputDir)) {
+        await deleteDirectoryRecursive(path.join(outputDir, outputDir));
+        console.log(
+          `Deleted directory that no longer exists in source: ${outputDir}`
+        );
+      }
+    }
+
+    // For each directory that exists in both source and output, check for files to delete
+    for (const dir of srcDirs) {
+      const srcDirPath = path.join(srcDir, dir);
+      const outputDirPath = path.join(outputDir, dir);
+
+      // Skip if output directory doesn't exist
+      if (!(await fileExists(outputDirPath))) {
+        continue;
+      }
+
+      // Get all media files in source directory
+      const srcFiles = await readdir(srcDirPath);
+      const srcMediaFiles = srcFiles.filter((file) => {
+        const ext = path.extname(file).toLowerCase();
+        return (
+          ([".jpg", ".jpeg", ".png", ".gif"].includes(ext) ||
+            VIDEO_EXTS.includes(ext)) &&
+          ext !== ".md"
+        );
+      });
+
+      // Get base names of source media files (without extension)
+      const srcBasenames = srcMediaFiles.map((file) => {
+        return path.basename(file, path.extname(file));
+      });
+
+      // Get all files in output directory
+      const outputFiles = await readdir(outputDirPath);
+
+      // Check each output file to see if it should be deleted
+      for (const outputFile of outputFiles) {
+        const outputExt = path.extname(outputFile).toLowerCase();
+        const outputBasename = path.basename(outputFile, outputExt);
+
+        // Handle thumbnail files (.thumb.jpg)
+        if (outputFile.endsWith(".thumb.jpg")) {
+          const originalName = outputFile.replace(".thumb.jpg", "");
+          if (!srcMediaFiles.includes(originalName)) {
+            await unlink(path.join(outputDirPath, outputFile));
+            console.log(`Deleted obsolete thumbnail: ${outputFile}`);
+          }
+          continue;
+        }
+
+        // Handle HTML files
+        if (outputExt === ".html") {
+          // Check if corresponding source media file exists
+          if (!srcBasenames.includes(outputBasename)) {
+            await unlink(path.join(outputDirPath, outputFile));
+            console.log(`Deleted obsolete HTML file: ${outputFile}`);
+          }
+          continue;
+        }
+
+        // Handle media files
+        if (
+          [".jpg", ".jpeg", ".png", ".gif"].includes(outputExt) ||
+          WEB_COMPATIBLE_VIDEO_EXTS.includes(outputExt)
+        ) {
+          // Check if this is a converted video (check for original in source)
+          const isConverted =
+            WEB_COMPATIBLE_VIDEO_EXTS.includes(outputExt) &&
+            !srcMediaFiles.includes(outputFile);
+
+          // If it's a converted video, check if the base filename exists with any video extension
+          if (isConverted) {
+            const originalExists = srcBasenames.includes(outputBasename);
+            if (!originalExists) {
+              await unlink(path.join(outputDirPath, outputFile));
+              console.log(`Deleted obsolete converted video: ${outputFile}`);
+            }
+          }
+          // For regular media files, check if the exact file exists in source
+          else if (!srcMediaFiles.includes(outputFile)) {
+            await unlink(path.join(outputDirPath, outputFile));
+            console.log(`Deleted obsolete media file: ${outputFile}`);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error(`Error cleaning up output directory: ${err.message}`);
+  }
+}
+
 async function generateGallery(sourceDir, outputDir, outputFile) {
   // Check if FFmpeg is installed
   const ffmpegAvailable = await checkFFmpeg();
@@ -212,6 +380,9 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
   if (!(await fileExists(outputFileDir))) {
     await mkdir(outputFileDir, { recursive: true });
   }
+
+  // Clean up files in output directory that no longer exist in source
+  await cleanupOutputDirectory(sourceDir, outputDir);
 
   // Start building HTML
   let html = ``;
@@ -357,18 +528,32 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
           // Ensure directory exists
           await mkdir(path.dirname(thumbnailPath), { recursive: true });
 
-          // Check if thumbnail already exists
+          // Check if thumbnail already exists or if force regeneration is enabled
           const thumbnailExists = await fileExists(thumbnailPath);
+          const shouldGenerateThumbnail =
+            !thumbnailExists || REGENERATE_THUMBNAILS;
 
-          // Only create thumbnail if it doesn't exist
-          if (!thumbnailExists) {
-            console.log(`Creating thumbnail for ${filePath}`);
-            // Process image to create thumbnail while preserving aspect ratio
+          // Only create thumbnail if it doesn't exist or regeneration is forced
+          if (shouldGenerateThumbnail) {
+            if (REGENERATE_THUMBNAILS && thumbnailExists) {
+              console.log(`Regenerating thumbnail for ${filePath}`);
+            } else {
+              console.log(`Creating thumbnail for ${filePath}`);
+            }
+            // Process image to create high quality thumbnail while preserving aspect ratio
             await sharp(filePath)
               .resize({
                 width: THUMBNAIL_SIZE,
+                height: THUMBNAIL_SIZE,
                 fit: sharp.fit.inside, // Preserve aspect ratio
                 withoutEnlargement: true, // Don't enlarge small images
+              })
+              .jpeg({
+                quality: 85, // Higher quality (default is 80)
+                progressive: true, // Create progressive JPEGs for faster perceived loading
+                optimizeScans: true, // Optimize progressive scans for web
+                mozjpeg: true, // Use mozjpeg optimizations when available
+                trellisQuantisation: true, // Apply trellis quantisation for better quality/size ratio
               })
               .toFile(thumbnailPath);
           }
