@@ -14,7 +14,7 @@ const writeFile = promisify(fs.writeFile);
 
 // Check if input file was provided
 const inputFile = "src/cv.yaml";
-const outputFile = "output/cv.html";
+const outputFile = "output/index.html";
 
 // Read the input file
 let yamlContent;
