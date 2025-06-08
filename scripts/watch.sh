@@ -12,7 +12,7 @@ do
     node scripts/build-cv.js
 
     echo "Syncing with S3 bucket..."
-    rclone sync output/ s3:alexmiller.cv --stats-one-line -v
+    rclone sync output/ s3:alexmiller.cv --stats-one-line --no-update-modtime -v
 
     echo "Invalidating CloudFront cache..."
     aws cloudfront create-invalidation \

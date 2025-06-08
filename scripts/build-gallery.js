@@ -18,6 +18,8 @@ const rmdir = promisify(fs.rmdir); // For deleting directories
 const execPromise = promisify(exec);
 
 const THUMBNAIL_SIZE = 600; // Max dimension of thumbnails in pixels (increased for higher quality)
+const VIDEO_PREVIEW_HEIGHT = 400; // Max height for video previews in pixels
+const VIDEO_PREVIEW_DURATION = 1; // Max duration for video previews in seconds
 
 // Parse command line arguments
 const args = process.argv.slice(2);
@@ -39,6 +41,19 @@ async function fileExists(filePath) {
     return true;
   } catch (err) {
     return false;
+  }
+}
+
+// Get video duration in seconds
+async function getVideoDuration(inputPath) {
+  try {
+    const { stdout } = await execPromise(
+      `ffprobe -v quiet -show_entries format=duration -of csv=p=0 "${inputPath}"`
+    );
+    return parseFloat(stdout.trim());
+  } catch (err) {
+    console.error(`Error getting video duration: ${err.message}`);
+    return null;
   }
 }
 
@@ -80,6 +95,46 @@ async function convertVideo(inputPath, outputPath) {
     return outputPath;
   } catch (err) {
     console.error(`Error converting video: ${err.message}`);
+    return null; // Return null on error
+  }
+}
+
+async function createVideoPreview(inputPath, outputPath) {
+  // Create output directory if it doesn't exist
+  const outputDir = path.dirname(outputPath);
+  if (!(await fileExists(outputDir))) {
+    await mkdir(outputDir, { recursive: true });
+  }
+
+  console.log(`Creating video preview: ${inputPath} to ${outputPath}`);
+
+  try {
+    // Get video duration to calculate middle position
+    const duration = await getVideoDuration(inputPath);
+    let startTime = 0;
+
+    if (duration && duration > VIDEO_PREVIEW_DURATION) {
+      // Calculate start time to get the middle portion
+      // If duration is long enough, start from the middle minus half the preview duration
+      startTime = Math.max(0, duration / 2 - VIDEO_PREVIEW_DURATION / 2);
+    }
+
+    // Create a small, short preview video from the middle
+    // -ss ${startTime}: start at calculated time (middle of video)
+    // -t ${VIDEO_PREVIEW_DURATION}: limit duration to specified seconds
+    // -vf "scale=-2:${VIDEO_PREVIEW_HEIGHT}": scale to max height, ensure width is divisible by 2
+    // -crf 23: good quality compression
+    // -preset fast: balance between speed and compression
+    // -an: remove audio (not needed for previews)
+    // -movflags faststart: optimize for web streaming
+    // The -2 flag ensures the width is divisible by 2, which is required by H.264 encoder
+    await execPromise(
+      `ffmpeg -y -ss ${startTime} -i "${inputPath}" -t ${VIDEO_PREVIEW_DURATION} -vf "scale=-2:${VIDEO_PREVIEW_HEIGHT}" -c:v libx264 -crf 23 -preset fast -an -movflags faststart "${outputPath}"`
+    );
+    console.log(`Successfully created video preview: ${outputPath}`);
+    return outputPath;
+  } catch (err) {
+    console.error(`Error creating video preview: ${err.message}`);
     return null; // Return null on error
   }
 }
@@ -242,7 +297,7 @@ async function deleteDirectoryRecursive(dirPath) {
   }
 }
 
-// NEW FUNCTION: Delete files in output that no longer exist in source
+// MODIFIED FUNCTION: Delete files in output that no longer exist in source (updated to handle video previews)
 async function cleanupOutputDirectory(srcDir, outputDir) {
   try {
     // Check if output directory exists
@@ -326,6 +381,17 @@ async function cleanupOutputDirectory(srcDir, outputDir) {
           if (!srcMediaFiles.includes(originalName)) {
             await unlink(path.join(outputDirPath, outputFile));
             console.log(`Deleted obsolete thumbnail: ${outputFile}`);
+          }
+          continue;
+        }
+
+        // Handle video preview files (.preview.mp4)
+        if (outputFile.endsWith(".preview.mp4")) {
+          const originalName = outputFile.replace(".preview.mp4", "");
+          const hasOriginal = srcBasenames.includes(originalName);
+          if (!hasOriginal) {
+            await unlink(path.join(outputDirPath, outputFile));
+            console.log(`Deleted obsolete video preview: ${outputFile}`);
           }
           continue;
         }
@@ -617,6 +683,36 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
           await fs.promises.copyFile(filePath, outputVideoPath);
         }
 
+        // Create video preview for gallery display
+        let previewVideoSrc = finalVideoSrc;
+        if (ffmpegAvailable) {
+          const previewFilename = `${path.basename(file, ext)}.preview.mp4`;
+          const previewPath = path.join(outputDir, dir.name, previewFilename);
+
+          // Check if preview already exists or if force regeneration is enabled
+          const previewExists = await fileExists(previewPath);
+          const shouldGeneratePreview = !previewExists || REGENERATE_THUMBNAILS;
+
+          if (shouldGeneratePreview) {
+            // Use the original file for creating preview to maintain quality
+            const sourceForPreview =
+              finalVideoSrc.endsWith(".mp4") &&
+              (await fileExists(path.join(outputDir, dir.name, finalVideoSrc)))
+                ? path.join(outputDir, dir.name, finalVideoSrc)
+                : filePath;
+
+            const createdPreview = await createVideoPreview(
+              sourceForPreview,
+              previewPath
+            );
+            if (createdPreview) {
+              previewVideoSrc = previewFilename;
+            }
+          } else {
+            previewVideoSrc = previewFilename;
+          }
+        }
+
         // Generate the media page
         const mediaPageInfo = {
           fileName: item.fileName,
@@ -635,12 +731,12 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
           path.join(outputDir, dir.name)
         );
 
-        // Add video thumbnail that links to media page
+        // Add video preview that links to media page
         html += `
           <div class="gallery-item">
             <a href="${dir.name}/${item.htmlFile}">
               <video autoplay loop muted playsinline preload="metadata">
-                <source src="${dir.name}/${finalVideoSrc}" type="${videoType}">
+                <source src="${dir.name}/${previewVideoSrc}" type="video/mp4">
                 Your browser does not support the video tag.
               </video>
             </a>
