@@ -437,6 +437,259 @@ async function cleanupOutputDirectory(srcDir, outputDir) {
   }
 }
 
+// Helper function to process an image file
+async function processImageFile(
+  filePath,
+  fileName,
+  outputDir,
+  ffmpegAvailable
+) {
+  const file = path.basename(filePath);
+  const ext = path.extname(file).toLowerCase();
+
+  // Create thumbnail for image
+  const thumbnailFilename = `${file}.thumb.jpg`;
+  const thumbnailPath = path.join(outputDir, thumbnailFilename);
+
+  try {
+    // Ensure directory exists
+    await mkdir(path.dirname(thumbnailPath), { recursive: true });
+
+    // Check if thumbnail already exists or if force regeneration is enabled
+    const thumbnailExists = await fileExists(thumbnailPath);
+    const shouldGenerateThumbnail = !thumbnailExists || REGENERATE_THUMBNAILS;
+
+    // Only create thumbnail if it doesn't exist or regeneration is forced
+    if (shouldGenerateThumbnail) {
+      if (REGENERATE_THUMBNAILS && thumbnailExists) {
+        console.log(`Regenerating thumbnail for ${filePath}`);
+      } else {
+        console.log(`Creating thumbnail for ${filePath}`);
+      }
+      // Process image to create high quality thumbnail while preserving aspect ratio
+      await sharp(filePath)
+        .resize({
+          width: THUMBNAIL_SIZE,
+          height: THUMBNAIL_SIZE,
+          fit: sharp.fit.inside, // Preserve aspect ratio
+          withoutEnlargement: true, // Don't enlarge small images
+        })
+        .jpeg({
+          quality: 85, // Higher quality (default is 80)
+          progressive: true, // Create progressive JPEGs for faster perceived loading
+          optimizeScans: true, // Optimize progressive scans for web
+          mozjpeg: true, // Use mozjpeg optimizations when available
+          trellisQuantisation: true, // Apply trellis quantisation for better quality/size ratio
+        })
+        .toFile(thumbnailPath);
+    }
+
+    // Copy original file to output directory
+    const outputImagePath = path.join(outputDir, file);
+    await fs.promises.copyFile(filePath, outputImagePath);
+
+    return {
+      mediaPath: file,
+      mediaType: "image",
+      thumbnailPath: thumbnailFilename,
+    };
+  } catch (err) {
+    console.error(`Error processing image ${filePath}: ${err.message}`);
+    return null;
+  }
+}
+
+// Helper function to process a video file
+async function processVideoFile(
+  filePath,
+  fileName,
+  outputDir,
+  ffmpegAvailable
+) {
+  const file = path.basename(filePath);
+  const ext = path.extname(file).toLowerCase();
+
+  // Check if video needs conversion
+  let videoSrc = file; // Use relative path
+  let videoType = `video/${ext.substring(1)}`;
+  let finalVideoSrc = videoSrc;
+
+  // If video is not web-compatible and FFmpeg is available, convert it
+  if (!WEB_COMPATIBLE_VIDEO_EXTS.includes(ext) && ffmpegAvailable) {
+    const outputFilename = `${path.basename(file, ext)}.mp4`;
+    const outputPath = path.join(outputDir, outputFilename);
+
+    const convertedPath = await convertVideo(filePath, outputPath);
+    if (convertedPath) {
+      finalVideoSrc = outputFilename;
+      videoType = "video/mp4";
+    }
+  } else {
+    // Copy original video to output directory if it's web-compatible
+    const outputVideoPath = path.join(outputDir, file);
+    await mkdir(path.dirname(outputVideoPath), { recursive: true });
+    await fs.promises.copyFile(filePath, outputVideoPath);
+  }
+
+  // Create video preview for gallery display
+  let previewVideoSrc = finalVideoSrc;
+  if (ffmpegAvailable) {
+    const previewFilename = `${path.basename(file, ext)}.preview.mp4`;
+    const previewPath = path.join(outputDir, previewFilename);
+
+    // Check if preview already exists or if force regeneration is enabled
+    const previewExists = await fileExists(previewPath);
+    const shouldGeneratePreview = !previewExists || REGENERATE_THUMBNAILS;
+
+    if (shouldGeneratePreview) {
+      // Use the original file for creating preview to maintain quality
+      const sourceForPreview =
+        finalVideoSrc.endsWith(".mp4") &&
+        (await fileExists(path.join(outputDir, finalVideoSrc)))
+          ? path.join(outputDir, finalVideoSrc)
+          : filePath;
+
+      const createdPreview = await createVideoPreview(
+        sourceForPreview,
+        previewPath
+      );
+      if (createdPreview) {
+        previewVideoSrc = previewFilename;
+      }
+    } else {
+      previewVideoSrc = previewFilename;
+    }
+  }
+
+  return {
+    mediaPath: finalVideoSrc,
+    mediaType: "video",
+    previewPath: previewVideoSrc,
+  };
+}
+
+async function generateShowcase(sourceDir, outputDir, outputFile) {
+  // Check if FFmpeg is installed
+  const ffmpegAvailable = await checkFFmpeg();
+
+  // Create output directory
+  if (!(await fileExists(outputDir))) {
+    await mkdir(outputDir, { recursive: true });
+  }
+
+  // Get all files in the source directory (flat structure)
+  const files = await readdir(sourceDir);
+
+  // Filter for media files
+  const mediaFiles = files.filter((file) => {
+    const ext = path.extname(file).toLowerCase();
+    return (
+      ([".jpg", ".jpeg", ".png", ".gif"].includes(ext) ||
+        VIDEO_EXTS.includes(ext)) &&
+      ext !== ".md"
+    );
+  });
+
+  // Sort media files for consistent navigation
+  mediaFiles.sort();
+
+  if (mediaFiles.length === 0) {
+    console.log("No media files found in showcase directory");
+    return;
+  }
+
+  // Process all media files and create media items
+  const mediaItems = [];
+
+  for (let i = 0; i < mediaFiles.length; i++) {
+    const file = mediaFiles[i];
+    const ext = path.extname(file).toLowerCase();
+    const baseName = path.basename(file, ext);
+    const filePath = path.join(sourceDir, file);
+    const htmlFileName = `${baseName}.html`;
+
+    let processedMedia = null;
+
+    // Process images
+    if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
+      processedMedia = await processImageFile(
+        filePath,
+        baseName,
+        outputDir,
+        ffmpegAvailable
+      );
+    }
+    // Process videos
+    else if (VIDEO_EXTS.includes(ext)) {
+      processedMedia = await processVideoFile(
+        filePath,
+        baseName,
+        outputDir,
+        ffmpegAvailable
+      );
+    }
+
+    if (processedMedia) {
+      mediaItems.push({
+        fileName: baseName,
+        htmlFile: htmlFileName,
+        originalFile: file,
+        ...processedMedia,
+      });
+    }
+  }
+
+  // Set up navigation links between media pages
+  for (let i = 0; i < mediaItems.length; i++) {
+    const item = mediaItems[i];
+
+    // Set up navigation links
+    if (i > 0) {
+      item.prev = mediaItems[i - 1].htmlFile;
+    } else {
+      item.prev = null;
+    }
+
+    if (i < mediaItems.length - 1) {
+      item.next = mediaItems[i + 1].htmlFile;
+    } else {
+      item.next = null;
+    }
+  }
+
+  // Generate media pages for each item
+  for (const item of mediaItems) {
+    const mediaPageInfo = {
+      fileName: item.fileName,
+      mediaPath: item.mediaPath,
+      mediaType: item.mediaType,
+      prev: item.prev,
+      next: item.next,
+      dirTitle: "Showcase", // Default title for showcase
+      dirDescription: "", // No description for showcase
+    };
+
+    await generateMediaPage(
+      mediaPageInfo,
+      "", // No subdirectory for showcase
+      "showcase",
+      outputDir
+    );
+  }
+
+  // Copy the first media page to serve as the index
+  if (mediaItems.length > 0) {
+    const firstMediaPage = path.join(outputDir, mediaItems[0].htmlFile);
+    if (await fileExists(firstMediaPage)) {
+      const indexContent = await readFile(firstMediaPage, "utf8");
+      await writeFile(outputFile, indexContent);
+      console.log(
+        `Showcase index generated at ${outputFile} (first media: ${mediaItems[0].htmlFile})`
+      );
+    }
+  }
+}
+
 async function generateGallery(sourceDir, outputDir, outputFile) {
   // Check if FFmpeg is installed
   const ffmpegAvailable = await checkFFmpeg();
@@ -799,6 +1052,12 @@ async function generateBothGalleries() {
       console.error(`Error generating gallery for ${gallery.sourceDir}:`, err);
     }
   }
+
+  generateShowcase(
+    "src/showcase",
+    path.join("output", "showcase"),
+    path.join("output", "showcase", "index.html")
+  );
 }
 
 // Execute the generation
