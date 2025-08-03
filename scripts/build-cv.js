@@ -14,7 +14,7 @@ const writeFile = promisify(fs.writeFile);
 
 // Check if input file was provided
 const inputFile = "src/cv.yaml";
-const outputFile = "output/index.html";
+const outputFile = "output/cv.html";
 
 // Read the input file
 let yamlContent;
@@ -101,6 +101,7 @@ async function main() {
   try {
     // Parse YAML using js-yaml library
     const parsedData = yaml.load(yamlContent);
+    console.log(parsedData);
     const contentHtml = generateHtml(parsedData);
     // Read the template file
     const templatePath = path.resolve(process.cwd(), "src/template.html");

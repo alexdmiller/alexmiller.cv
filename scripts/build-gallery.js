@@ -1052,12 +1052,6 @@ async function generateBothGalleries() {
       console.error(`Error generating gallery for ${gallery.sourceDir}:`, err);
     }
   }
-
-  generateShowcase(
-    "src/showcase",
-    path.join("output", "showcase"),
-    path.join("output", "showcase", "index.html")
-  );
 }
 
 // Execute the generation
