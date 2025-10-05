@@ -192,6 +192,7 @@ async function generateMediaPage(mediaInfo, dirName, galleryType, outputDir) {
 
   mediaContent += `<div class="media-container">`;
 
+  // TODO: link should go the index page passed in as parameter, rather than ../index.html
   if (galleryType === "in-progress") {
     mediaContent += `
     <div class="back-to-gallery"><a href="../index.html" class="back">Back to in-progress gallery</a></div>`;
@@ -437,260 +438,7 @@ async function cleanupOutputDirectory(srcDir, outputDir) {
   }
 }
 
-// Helper function to process an image file
-async function processImageFile(
-  filePath,
-  fileName,
-  outputDir,
-  ffmpegAvailable
-) {
-  const file = path.basename(filePath);
-  const ext = path.extname(file).toLowerCase();
-
-  // Create thumbnail for image
-  const thumbnailFilename = `${file}.thumb.jpg`;
-  const thumbnailPath = path.join(outputDir, thumbnailFilename);
-
-  try {
-    // Ensure directory exists
-    await mkdir(path.dirname(thumbnailPath), { recursive: true });
-
-    // Check if thumbnail already exists or if force regeneration is enabled
-    const thumbnailExists = await fileExists(thumbnailPath);
-    const shouldGenerateThumbnail = !thumbnailExists || REGENERATE_THUMBNAILS;
-
-    // Only create thumbnail if it doesn't exist or regeneration is forced
-    if (shouldGenerateThumbnail) {
-      if (REGENERATE_THUMBNAILS && thumbnailExists) {
-        console.log(`Regenerating thumbnail for ${filePath}`);
-      } else {
-        console.log(`Creating thumbnail for ${filePath}`);
-      }
-      // Process image to create high quality thumbnail while preserving aspect ratio
-      await sharp(filePath)
-        .resize({
-          width: THUMBNAIL_SIZE,
-          height: THUMBNAIL_SIZE,
-          fit: sharp.fit.inside, // Preserve aspect ratio
-          withoutEnlargement: true, // Don't enlarge small images
-        })
-        .jpeg({
-          quality: 85, // Higher quality (default is 80)
-          progressive: true, // Create progressive JPEGs for faster perceived loading
-          optimizeScans: true, // Optimize progressive scans for web
-          mozjpeg: true, // Use mozjpeg optimizations when available
-          trellisQuantisation: true, // Apply trellis quantisation for better quality/size ratio
-        })
-        .toFile(thumbnailPath);
-    }
-
-    // Copy original file to output directory
-    const outputImagePath = path.join(outputDir, file);
-    await fs.promises.copyFile(filePath, outputImagePath);
-
-    return {
-      mediaPath: file,
-      mediaType: "image",
-      thumbnailPath: thumbnailFilename,
-    };
-  } catch (err) {
-    console.error(`Error processing image ${filePath}: ${err.message}`);
-    return null;
-  }
-}
-
-// Helper function to process a video file
-async function processVideoFile(
-  filePath,
-  fileName,
-  outputDir,
-  ffmpegAvailable
-) {
-  const file = path.basename(filePath);
-  const ext = path.extname(file).toLowerCase();
-
-  // Check if video needs conversion
-  let videoSrc = file; // Use relative path
-  let videoType = `video/${ext.substring(1)}`;
-  let finalVideoSrc = videoSrc;
-
-  // If video is not web-compatible and FFmpeg is available, convert it
-  if (!WEB_COMPATIBLE_VIDEO_EXTS.includes(ext) && ffmpegAvailable) {
-    const outputFilename = `${path.basename(file, ext)}.mp4`;
-    const outputPath = path.join(outputDir, outputFilename);
-
-    const convertedPath = await convertVideo(filePath, outputPath);
-    if (convertedPath) {
-      finalVideoSrc = outputFilename;
-      videoType = "video/mp4";
-    }
-  } else {
-    // Copy original video to output directory if it's web-compatible
-    const outputVideoPath = path.join(outputDir, file);
-    await mkdir(path.dirname(outputVideoPath), { recursive: true });
-    await fs.promises.copyFile(filePath, outputVideoPath);
-  }
-
-  // Create video preview for gallery display
-  let previewVideoSrc = finalVideoSrc;
-  if (ffmpegAvailable) {
-    const previewFilename = `${path.basename(file, ext)}.preview.mp4`;
-    const previewPath = path.join(outputDir, previewFilename);
-
-    // Check if preview already exists or if force regeneration is enabled
-    const previewExists = await fileExists(previewPath);
-    const shouldGeneratePreview = !previewExists || REGENERATE_THUMBNAILS;
-
-    if (shouldGeneratePreview) {
-      // Use the original file for creating preview to maintain quality
-      const sourceForPreview =
-        finalVideoSrc.endsWith(".mp4") &&
-        (await fileExists(path.join(outputDir, finalVideoSrc)))
-          ? path.join(outputDir, finalVideoSrc)
-          : filePath;
-
-      const createdPreview = await createVideoPreview(
-        sourceForPreview,
-        previewPath
-      );
-      if (createdPreview) {
-        previewVideoSrc = previewFilename;
-      }
-    } else {
-      previewVideoSrc = previewFilename;
-    }
-  }
-
-  return {
-    mediaPath: finalVideoSrc,
-    mediaType: "video",
-    previewPath: previewVideoSrc,
-  };
-}
-
-async function generateShowcase(sourceDir, outputDir, outputFile) {
-  // Check if FFmpeg is installed
-  const ffmpegAvailable = await checkFFmpeg();
-
-  // Create output directory
-  if (!(await fileExists(outputDir))) {
-    await mkdir(outputDir, { recursive: true });
-  }
-
-  // Get all files in the source directory (flat structure)
-  const files = await readdir(sourceDir);
-
-  // Filter for media files
-  const mediaFiles = files.filter((file) => {
-    const ext = path.extname(file).toLowerCase();
-    return (
-      ([".jpg", ".jpeg", ".png", ".gif"].includes(ext) ||
-        VIDEO_EXTS.includes(ext)) &&
-      ext !== ".md"
-    );
-  });
-
-  // Sort media files for consistent navigation
-  mediaFiles.sort();
-
-  if (mediaFiles.length === 0) {
-    console.log("No media files found in showcase directory");
-    return;
-  }
-
-  // Process all media files and create media items
-  const mediaItems = [];
-
-  for (let i = 0; i < mediaFiles.length; i++) {
-    const file = mediaFiles[i];
-    const ext = path.extname(file).toLowerCase();
-    const baseName = path.basename(file, ext);
-    const filePath = path.join(sourceDir, file);
-    const htmlFileName = `${baseName}.html`;
-
-    let processedMedia = null;
-
-    // Process images
-    if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
-      processedMedia = await processImageFile(
-        filePath,
-        baseName,
-        outputDir,
-        ffmpegAvailable
-      );
-    }
-    // Process videos
-    else if (VIDEO_EXTS.includes(ext)) {
-      processedMedia = await processVideoFile(
-        filePath,
-        baseName,
-        outputDir,
-        ffmpegAvailable
-      );
-    }
-
-    if (processedMedia) {
-      mediaItems.push({
-        fileName: baseName,
-        htmlFile: htmlFileName,
-        originalFile: file,
-        ...processedMedia,
-      });
-    }
-  }
-
-  // Set up navigation links between media pages
-  for (let i = 0; i < mediaItems.length; i++) {
-    const item = mediaItems[i];
-
-    // Set up navigation links
-    if (i > 0) {
-      item.prev = mediaItems[i - 1].htmlFile;
-    } else {
-      item.prev = null;
-    }
-
-    if (i < mediaItems.length - 1) {
-      item.next = mediaItems[i + 1].htmlFile;
-    } else {
-      item.next = null;
-    }
-  }
-
-  // Generate media pages for each item
-  for (const item of mediaItems) {
-    const mediaPageInfo = {
-      fileName: item.fileName,
-      mediaPath: item.mediaPath,
-      mediaType: item.mediaType,
-      prev: item.prev,
-      next: item.next,
-      dirTitle: "Showcase", // Default title for showcase
-      dirDescription: "", // No description for showcase
-    };
-
-    await generateMediaPage(
-      mediaPageInfo,
-      "", // No subdirectory for showcase
-      "showcase",
-      outputDir
-    );
-  }
-
-  // Copy the first media page to serve as the index
-  if (mediaItems.length > 0) {
-    const firstMediaPage = path.join(outputDir, mediaItems[0].htmlFile);
-    if (await fileExists(firstMediaPage)) {
-      const indexContent = await readFile(firstMediaPage, "utf8");
-      await writeFile(outputFile, indexContent);
-      console.log(
-        `Showcase index generated at ${outputFile} (first media: ${mediaItems[0].htmlFile})`
-      );
-    }
-  }
-}
-
-async function generateGallery(sourceDir, outputDir, outputFile) {
+async function generateGallery(sourceDir, outputDir, outputFile, linkPrefix) {
   // Check if FFmpeg is installed
   const ffmpegAvailable = await checkFFmpeg();
 
@@ -790,187 +538,70 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
     }
   }
 
-  // Process each directory section
-  for (const dir of directories) {
-    // Get directory info from description.yaml if available
-    const dirInfo = await getDirectoryInfo(dir.path);
+  // Create a single section for all media thumbnails
+  html += `<section class="gallery-section">`;
+  html += `<div class="thumbnails">`;
 
-    // Create a section for this directory
-    html += `<section class="gallery-section" id="${dir.name}">`;
+  // Process all media items across all directories
+  for (let i = 0; i < allMediaItems.length; i++) {
+    const item = allMediaItems[i];
+    const file = item.originalFile;
+    const ext = item.extension;
+    const filePath = path.join(sourceDir, item.sectionDir, file);
 
-    html += `<div class="description">`;
-    html += `<h2>${dirInfo.title}</h2>`;
-
-    if (dirInfo.description) {
-      html += marked.parse(dirInfo.description);
-    }
-
-    html += `</div>`;
-
-    html += `<div class="thumbnails">`;
-
-    // Process all files in the directory
-    const files = await readdir(dir.path);
-
-    // Filter for media files (exclude markdown)
-    const mediaFiles = files.filter((file) => {
-      const ext = path.extname(file).toLowerCase();
-      return (
-        ([".jpg", ".jpeg", ".png", ".gif"].includes(ext) ||
-          VIDEO_EXTS.includes(ext)) &&
-        ext !== ".md"
+    // Process images
+    if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
+      // Create thumbnail for image
+      const thumbnailFilename = `${file}.thumb.jpg`;
+      const thumbnailPath = path.join(
+        outputDir,
+        item.sectionDir,
+        thumbnailFilename
       );
-    });
 
-    // Sort media files for consistent navigation
-    mediaFiles.sort();
+      try {
+        // Ensure directory exists
+        await mkdir(path.dirname(thumbnailPath), { recursive: true });
 
-    // Get the media items for this section
-    const sectionMediaItems = allMediaItems.filter(
-      (item) => item.sectionDir === dir.name
-    );
+        // Check if thumbnail already exists or if force regeneration is enabled
+        const thumbnailExists = await fileExists(thumbnailPath);
+        const shouldGenerateThumbnail =
+          !thumbnailExists || REGENERATE_THUMBNAILS;
 
-    // Process each media file in this section
-    for (let i = 0; i < sectionMediaItems.length; i++) {
-      const item = sectionMediaItems[i];
-      const file = item.originalFile;
-      const ext = item.extension;
-      const filePath = path.join(sourceDir, dir.name, file);
-
-      // Process images
-      if ([".jpg", ".jpeg", ".png", ".gif"].includes(ext)) {
-        // Create thumbnail for image
-        const thumbnailFilename = `${file}.thumb.jpg`;
-        const thumbnailPath = path.join(outputDir, dir.name, thumbnailFilename);
-
-        try {
-          // Ensure directory exists
-          await mkdir(path.dirname(thumbnailPath), { recursive: true });
-
-          // Check if thumbnail already exists or if force regeneration is enabled
-          const thumbnailExists = await fileExists(thumbnailPath);
-          const shouldGenerateThumbnail =
-            !thumbnailExists || REGENERATE_THUMBNAILS;
-
-          // Only create thumbnail if it doesn't exist or regeneration is forced
-          if (shouldGenerateThumbnail) {
-            if (REGENERATE_THUMBNAILS && thumbnailExists) {
-              console.log(`Regenerating thumbnail for ${filePath}`);
-            } else {
-              console.log(`Creating thumbnail for ${filePath}`);
-            }
-            // Process image to create high quality thumbnail while preserving aspect ratio
-            await sharp(filePath)
-              .resize({
-                width: THUMBNAIL_SIZE,
-                height: THUMBNAIL_SIZE,
-                fit: sharp.fit.inside, // Preserve aspect ratio
-                withoutEnlargement: true, // Don't enlarge small images
-              })
-              .jpeg({
-                quality: 85, // Higher quality (default is 80)
-                progressive: true, // Create progressive JPEGs for faster perceived loading
-                optimizeScans: true, // Optimize progressive scans for web
-                mozjpeg: true, // Use mozjpeg optimizations when available
-                trellisQuantisation: true, // Apply trellis quantisation for better quality/size ratio
-              })
-              .toFile(thumbnailPath);
-          }
-
-          // Copy original file to output directory
-          const outputImagePath = path.join(outputDir, dir.name, file);
-          await fs.promises.copyFile(filePath, outputImagePath);
-
-          // Generate the media page
-          const mediaPageInfo = {
-            fileName: item.fileName,
-            mediaPath: file,
-            mediaType: "image",
-            prev: item.prev,
-            next: item.next,
-            dirTitle: item.dirTitle,
-            dirDescription: item.dirDescription,
-          };
-
-          await generateMediaPage(
-            mediaPageInfo,
-            dir.name,
-            path.basename(outputDir),
-            path.join(outputDir, dir.name)
-          );
-
-          // Add image with thumbnail that links to media page (not directly to image)
-          html += `
-            <div class="gallery-item">
-              <a href="${dir.name}/${item.htmlFile}">
-                <img src="${dir.name}/${thumbnailFilename}" alt="${file}">
-              </a>
-            </div>`;
-        } catch (err) {
-          console.error(`Error with thumbnail for ${filePath}: ${err.message}`);
-          // Fallback to direct link if thumbnail creation fails
-          html += `<div class="gallery-item"><a href="${dir.name}/${file}">${file}</a></div>`;
-        }
-      }
-      // Process videos
-      else if (VIDEO_EXTS.includes(ext)) {
-        // Check if video needs conversion
-        let videoSrc = file; // Use relative path
-        let videoType = `video/${ext.substring(1)}`;
-        let finalVideoSrc = videoSrc;
-
-        // If video is not web-compatible and FFmpeg is available, convert it
-        if (!WEB_COMPATIBLE_VIDEO_EXTS.includes(ext) && ffmpegAvailable) {
-          const outputFilename = `${path.basename(file, ext)}.mp4`;
-          const outputPath = path.join(outputDir, dir.name, outputFilename);
-
-          const convertedPath = await convertVideo(filePath, outputPath);
-          if (convertedPath) {
-            finalVideoSrc = outputFilename;
-            videoType = "video/mp4";
-          }
-        } else {
-          // Copy original video to output directory if it's web-compatible
-          const outputVideoPath = path.join(outputDir, dir.name, file);
-          await mkdir(path.dirname(outputVideoPath), { recursive: true });
-          await fs.promises.copyFile(filePath, outputVideoPath);
-        }
-
-        // Create video preview for gallery display
-        let previewVideoSrc = finalVideoSrc;
-        if (ffmpegAvailable) {
-          const previewFilename = `${path.basename(file, ext)}.preview.mp4`;
-          const previewPath = path.join(outputDir, dir.name, previewFilename);
-
-          // Check if preview already exists or if force regeneration is enabled
-          const previewExists = await fileExists(previewPath);
-          const shouldGeneratePreview = !previewExists || REGENERATE_THUMBNAILS;
-
-          if (shouldGeneratePreview) {
-            // Use the original file for creating preview to maintain quality
-            const sourceForPreview =
-              finalVideoSrc.endsWith(".mp4") &&
-              (await fileExists(path.join(outputDir, dir.name, finalVideoSrc)))
-                ? path.join(outputDir, dir.name, finalVideoSrc)
-                : filePath;
-
-            const createdPreview = await createVideoPreview(
-              sourceForPreview,
-              previewPath
-            );
-            if (createdPreview) {
-              previewVideoSrc = previewFilename;
-            }
+        // Only create thumbnail if it doesn't exist or regeneration is forced
+        if (shouldGenerateThumbnail) {
+          if (REGENERATE_THUMBNAILS && thumbnailExists) {
+            console.log(`Regenerating thumbnail for ${filePath}`);
           } else {
-            previewVideoSrc = previewFilename;
+            console.log(`Creating thumbnail for ${filePath}`);
           }
+          // Process image to create high quality thumbnail while preserving aspect ratio
+          await sharp(filePath)
+            .resize({
+              width: THUMBNAIL_SIZE,
+              height: THUMBNAIL_SIZE,
+              fit: sharp.fit.inside, // Preserve aspect ratio
+              withoutEnlargement: true, // Don't enlarge small images
+            })
+            .jpeg({
+              quality: 85, // Higher quality (default is 80)
+              progressive: true, // Create progressive JPEGs for faster perceived loading
+              optimizeScans: true, // Optimize progressive scans for web
+              mozjpeg: true, // Use mozjpeg optimizations when available
+              trellisQuantisation: true, // Apply trellis quantisation for better quality/size ratio
+            })
+            .toFile(thumbnailPath);
         }
+
+        // Copy original file to output directory
+        const outputImagePath = path.join(outputDir, item.sectionDir, file);
+        await fs.promises.copyFile(filePath, outputImagePath);
 
         // Generate the media page
         const mediaPageInfo = {
           fileName: item.fileName,
-          mediaPath: finalVideoSrc,
-          mediaType: "video",
+          mediaPath: file,
+          mediaType: "image",
           prev: item.prev,
           next: item.next,
           dirTitle: item.dirTitle,
@@ -979,27 +610,121 @@ async function generateGallery(sourceDir, outputDir, outputFile) {
 
         await generateMediaPage(
           mediaPageInfo,
-          dir.name,
+          item.sectionDir,
           path.basename(outputDir),
-          path.join(outputDir, dir.name)
+          path.join(outputDir, item.sectionDir)
         );
 
-        // Add video preview that links to media page
+        // Add image with thumbnail that links to media page (not directly to image)
         html += `
           <div class="gallery-item">
-            <a href="${dir.name}/${item.htmlFile}">
-              <video autoplay loop muted playsinline preload="metadata">
-                <source src="${dir.name}/${previewVideoSrc}" type="video/mp4">
-                Your browser does not support the video tag.
-              </video>
+            <a href="${linkPrefix}/${item.sectionDir}/${item.htmlFile}">
+              <img src="${linkPrefix}/${item.sectionDir}/${thumbnailFilename}" alt="${file}">
             </a>
           </div>`;
+      } catch (err) {
+        console.error(`Error with thumbnail for ${filePath}: ${err.message}`);
+        // Fallback to direct link if thumbnail creation fails
+        html += `<div class="gallery-item"><a href="${item.sectionDir}/${file}">${file}</a></div>`;
       }
     }
+    // Process videos
+    else if (VIDEO_EXTS.includes(ext)) {
+      // Check if video needs conversion
+      let videoSrc = file; // Use relative path
+      let videoType = `video/${ext.substring(1)}`;
+      let finalVideoSrc = videoSrc;
 
-    html += `</div>`;
-    html += `</section>`;
+      // If video is not web-compatible and FFmpeg is available, convert it
+      if (!WEB_COMPATIBLE_VIDEO_EXTS.includes(ext) && ffmpegAvailable) {
+        const outputFilename = `${path.basename(file, ext)}.mp4`;
+        const outputPath = path.join(
+          outputDir,
+          item.sectionDir,
+          outputFilename
+        );
+
+        const convertedPath = await convertVideo(filePath, outputPath);
+        if (convertedPath) {
+          finalVideoSrc = outputFilename;
+          videoType = "video/mp4";
+        }
+      } else {
+        // Copy original video to output directory if it's web-compatible
+        const outputVideoPath = path.join(outputDir, item.sectionDir, file);
+        await mkdir(path.dirname(outputVideoPath), { recursive: true });
+        await fs.promises.copyFile(filePath, outputVideoPath);
+      }
+
+      // Create video preview for gallery display
+      let previewVideoSrc = finalVideoSrc;
+      if (ffmpegAvailable) {
+        const previewFilename = `${path.basename(file, ext)}.preview.mp4`;
+        const previewPath = path.join(
+          outputDir,
+          item.sectionDir,
+          previewFilename
+        );
+
+        // Check if preview already exists or if force regeneration is enabled
+        const previewExists = await fileExists(previewPath);
+        const shouldGeneratePreview = !previewExists || REGENERATE_THUMBNAILS;
+
+        if (shouldGeneratePreview) {
+          // Use the original file for creating preview to maintain quality
+          const sourceForPreview =
+            finalVideoSrc.endsWith(".mp4") &&
+            (await fileExists(
+              path.join(outputDir, item.sectionDir, finalVideoSrc)
+            ))
+              ? path.join(outputDir, item.sectionDir, finalVideoSrc)
+              : filePath;
+
+          const createdPreview = await createVideoPreview(
+            sourceForPreview,
+            previewPath
+          );
+          if (createdPreview) {
+            previewVideoSrc = previewFilename;
+          }
+        } else {
+          previewVideoSrc = previewFilename;
+        }
+      }
+
+      // Generate the media page
+      const mediaPageInfo = {
+        fileName: item.fileName,
+        mediaPath: finalVideoSrc,
+        mediaType: "video",
+        prev: item.prev,
+        next: item.next,
+        dirTitle: item.dirTitle,
+        dirDescription: item.dirDescription,
+      };
+
+      await generateMediaPage(
+        mediaPageInfo,
+        item.sectionDir,
+        path.basename(outputDir),
+        path.join(outputDir, item.sectionDir)
+      );
+
+      // Add video preview that links to media page
+      html += `
+        <div class="gallery-item">
+          <a href="${linkPrefix}/${item.sectionDir}/${item.htmlFile}">
+            <video autoplay loop muted playsinline preload="metadata">
+              <source src="${linkPrefix}/${item.sectionDir}/${previewVideoSrc}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </a>
+        </div>`;
+    }
   }
+
+  html += `</div>`;
+  html += `</section>`;
 
   // Main function
   try {
@@ -1032,11 +757,13 @@ async function generateBothGalleries() {
       sourceDir: "src/gallery/finished",
       outputDir: path.join(OUTPUT_BASE_DIR, "finished"),
       outputFile: path.join(OUTPUT_BASE_DIR, "finished", "index.html"),
+      linkPrefix: "gallery/finished",
     },
     {
       sourceDir: "src/gallery/in-progress",
       outputDir: path.join(OUTPUT_BASE_DIR, "in-progress"),
       outputFile: path.join(OUTPUT_BASE_DIR, "in-progress", "index.html"),
+      linkPrefix: "",
     },
   ];
 
@@ -1046,7 +773,8 @@ async function generateBothGalleries() {
       await generateGallery(
         gallery.sourceDir,
         gallery.outputDir,
-        gallery.outputFile
+        gallery.outputFile,
+        gallery.linkPrefix
       );
     } catch (err) {
       console.error(`Error generating gallery for ${gallery.sourceDir}:`, err);
