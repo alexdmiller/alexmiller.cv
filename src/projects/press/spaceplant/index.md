@@ -1,0 +1,6 @@
+---
+title: "spaceplant"
+description: "featured digital artwork"
+location: "CreativeApplications.net"
+date: "2022"
+---

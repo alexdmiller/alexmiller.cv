@@ -1,0 +1,6 @@
+---
+title: "Chaos Theory"
+description: "talk"
+location: "Processing Community Day, NYC"
+date: "2022"
+---

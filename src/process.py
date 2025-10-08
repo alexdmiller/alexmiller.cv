@@ -12,6 +12,16 @@ def slugify(text):
     text = re.sub(r'[-\s]+', '-', text)
     return text
 
+def convert_link(text):
+  pattern = r'<a href="([^"]+)">([^<]+)</a>'
+  match = re.search(pattern, text)
+  if match:
+    url = match.group(1)
+    text = match.group(2)
+    return f"[{text}]({url})"
+  return text
+
+
 def create_project_markdown(project_data):
     """Generate markdown content from project data."""
     lines = ["---"]
@@ -21,9 +31,12 @@ def create_project_markdown(project_data):
         if key == 'collaborators' and isinstance(value, list):
             lines.append(f"{key}:")
             for collab in value:
-                lines.append(f"  - {collab}")
+                collab = convert_link(str(collab))
+                lines.append(f"  - \"{collab.strip()}\"")
         else:
-            lines.append(f"{key}: {value}")
+            value = convert_link(str(value))
+            value = value.replace('"', '\\"')
+            lines.append(f"{key}: \"{str(value).strip()}\"")
     
     lines.append("---")
     lines.append("")
@@ -52,7 +65,7 @@ for category in data:
         markdown_content = create_project_markdown(project)
         
         # Write index.md file
-        index_path = os.path.join(project_dir, 'index.yaml')
+        index_path = os.path.join(project_dir, 'index.md')
         with open(index_path, 'w') as f:
             f.write(markdown_content)
         

@@ -3,20 +3,31 @@
 import yaml
 from pathlib import Path
 import frontmatter
+from mako.template import Template
+from mako.lookup import TemplateLookup
 
-PROJECT_DIR = "src/projects"
+PROJECT_DIR = Path("src/projects")
+TEMPLATES_DIR = Path("src/templates")
 
-for category_dir in Path(PROJECT_DIR).iterdir():
+lookup = TemplateLookup(directories=["src/templates"])
+
+# Use lookup for everything - this ensures consistent path resolution
+INDEX_TEMPLATE = lookup.get_template('index.html')
+
+# Now this will work!
+print(INDEX_TEMPLATE.render())
+
+# TODO: render using the template
+for category_dir in PROJECT_DIR.iterdir():
   if category_dir.is_dir():
     for project_dir in category_dir.iterdir():
       if project_dir.is_dir():
-        print(project_dir.name)
-        index_file = project_dir / "index.yaml"
+        # print(project_dir.name)
+        index_file = project_dir / "index.md"
         with open(index_file) as file:
           post = frontmatter.load(file)
-          print(post)
+          # print(frontmatter.dumps(post))
 
-
-# loop through each directory -- category
-# loop through each sub directory -- project
-# find index.md, parse into yaml
+# # loop through each directory -- category
+# # loop through each sub directory -- project
+# # find index.md, parse into yaml

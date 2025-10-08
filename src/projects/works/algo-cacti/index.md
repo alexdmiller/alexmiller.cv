@@ -1,0 +1,8 @@
+---
+title: "<em>Algo-cacti</em>"
+description: "installation"
+location: "Volunteer Park Conservatory, Seattle"
+date: "2018"
+collaborators:
+  - "Alex Nagy"
+---

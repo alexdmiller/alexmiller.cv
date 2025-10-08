@@ -1,0 +1,9 @@
+---
+title: "<em>Century-Scale Storage</em>"
+url: "https://lil.law.harvard.edu/century-scale-storage/"
+description: "web editorial design"
+location: "Library Innovation Lab, Harvard Law School"
+date: "2024"
+collaborators:
+  - "[Shelby Wilson](https://shelby.cool)"
+---
