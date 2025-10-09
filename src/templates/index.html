@@ -1,5 +1,9 @@
 <%inherit file="base.html"/>
 
 <%block name="content">
-  <p>Hello!</p>
+  <ul>
+    % for item in items:
+      <li>${item["title"]}</li>
+    % endfor
+  </ul>
 </%block>

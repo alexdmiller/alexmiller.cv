@@ -15,7 +15,8 @@ lookup = TemplateLookup(directories=["src/templates"])
 INDEX_TEMPLATE = lookup.get_template('index.html')
 
 # Now this will work!
-print(INDEX_TEMPLATE.render())
+
+all_posts = []
 
 # TODO: render using the template
 for category_dir in PROJECT_DIR.iterdir():
@@ -26,8 +27,12 @@ for category_dir in PROJECT_DIR.iterdir():
         index_file = project_dir / "index.md"
         with open(index_file) as file:
           post = frontmatter.load(file)
+          all_posts.append(post)
           # print(frontmatter.dumps(post))
+
+print(INDEX_TEMPLATE.render(items=all_posts))
 
 # # loop through each directory -- category
 # # loop through each sub directory -- project
 # # find index.md, parse into yaml
+
