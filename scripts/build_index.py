@@ -10,11 +10,7 @@ PROJECT_DIR = Path("src/projects")
 TEMPLATES_DIR = Path("src/templates")
 
 lookup = TemplateLookup(directories=["src/templates"])
-
-# Use lookup for everything - this ensures consistent path resolution
-INDEX_TEMPLATE = lookup.get_template('index.html')
-
-# Now this will work!
+index_template = lookup.get_template('index.html')
 
 all_posts = []
 
@@ -30,7 +26,7 @@ for category_dir in PROJECT_DIR.iterdir():
           all_posts.append(post)
           # print(frontmatter.dumps(post))
 
-print(INDEX_TEMPLATE.render(items=all_posts))
+print(index_template.render(items=all_posts))
 
 # # loop through each directory -- category
 # # loop through each sub directory -- project
