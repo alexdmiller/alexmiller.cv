@@ -1,4 +1,16 @@
+oct 11 2025
+-----------
+
+- started on process_image / process_video
+
+todo:
+- flesh out process_image and process_video functions
+- copy over data from alex.miller.garden
+- flesh out gallery system
+- question: should media be committed to github? probably not, right? so should projects/ folder not be committed at all?
+
 oct 7 2025
+----------
 
 - got things working with generating a bunch of individual project files
 - build_project.py parses these project md files
@@ -12,6 +24,8 @@ oct 7 2025
   - add images, gallery etc. 
 
 oct 4 2025
+----------
+
 - if you run ./scripts/watch.md and then ctrl+c to exit, it will leave the python webserver running
 - it runs under Python (NOT python) so run `ps aux | grep Python` to delete the process
 
