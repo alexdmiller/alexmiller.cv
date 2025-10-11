@@ -6,7 +6,6 @@ oct 11 2025
 todo:
 - flesh out process_image and process_video functions
 - copy over data from alex.miller.garden
-- flesh out gallery system
 - question: should media be committed to github? probably not, right? so should projects/ folder not be committed at all?
 
 oct 7 2025

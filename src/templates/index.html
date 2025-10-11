@@ -1,20 +1,33 @@
-<%inherit file="base.html"/>
+<%inherit file="base.html" />
 
 <%block name="content">
   <div id="projects">
     % for item in items:
-      <div class="item">
-        <div class="top">
-          <div class="date">${item.get("date", "")}</div>
-          <div class="title">${item.get("title", "")}</div>
-          <div class="description">${item.get("description", "")}</div>
-          <div class="location">${item.get("location", "")}</div>
-          <div class="collaborators">${item.get("collaborators", "")}</div>
-        </div>
-        <div class="content">
-          ${item.content}
-        </div>
+    <div class="item">
+      <div class="top">
+        <div class="date">${item.get("date", "")}</div>
+        <div class="title">${item.get("title", "")}</div>
+        <div class="description">${item.get("description", "")}</div>
+        <div class="location">${item.get("location", "")}</div>
+        <div class="collaborators">${item.get("collaborators", "")}</div>
       </div>
+      <div class="media">
+        % if item.get("media"):
+          % for media_item in item.get("media"):
+          <div class="media-item">
+            % if media_item.type == "image":
+              <img src="${media_item.thumbnail_path}" />
+            % elif media_item.type == "video":
+              ${media_item}
+            % endif
+          </div>
+          % endfor
+        % endif
+      </div>
+      <div class="content">
+        ${item.content}
+      </div>
+    </div>
     % endfor
   </div>
 </%block>
