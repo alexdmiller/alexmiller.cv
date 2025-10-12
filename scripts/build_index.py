@@ -18,6 +18,8 @@ OUTPUT_DIRECTORY = Path("output")
 OUTPUT_PROJECT_DIR = Path("projects")
 OUTPUT_INDEX = Path("index.html")
 
+CATEGORY_ORDER = ["works", "talks", "awards", "performances", "press", "curation"]
+
 TEMPLATE_LOOKUP = TemplateLookup(directories=["src/templates"])
 
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff"}
@@ -83,6 +85,7 @@ def process_video(video_path: Path, thumbnail_frame: float = 1) -> VideoResult:
     resolved_thumbnail_path = OUTPUT_DIRECTORY / thumbnail_path
 
     if not resolved_thumbnail_path.exists():
+        resolved_thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
         (
             ffmpeg.input(str(video_path), ss=thumbnail_frame)
             .filter(
@@ -102,6 +105,7 @@ def process_video(video_path: Path, thumbnail_frame: float = 1) -> VideoResult:
     resolved_video_output_path = OUTPUT_DIRECTORY / video_output_path
 
     if not resolved_video_output_path.exists():
+        resolved_video_output_path.parent.mkdir(parents=True, exist_ok=True)
         (
             ffmpeg.input(str(video_path))
             .output(
@@ -151,24 +155,21 @@ def render_markdown(value: dict | list | str):
 def render_index() -> str:
     index_template = TEMPLATE_LOOKUP.get_template("index.html")
 
-    all_posts = []
+    items_by_category = {}
 
     for category_dir in PROJECT_DIR.iterdir():
         if category_dir.is_dir():
+            items_by_category[category_dir.name] = []
             for project_dir in category_dir.iterdir():
                 if project_dir.is_dir():
                     media_list = process_media(project_dir)
-
                     index_file = project_dir / "index.md"
                     with open(index_file) as file:
-                        post = frontmatter.load(file)
-                        post.metadata = render_markdown(post.metadata)  # type: ignore
-
-                        post["media"] = media_list
-                        print(post.metadata)
-                        all_posts.append(post)
-
-    return index_template.render(items=all_posts)  # type: ignore
+                        item = frontmatter.load(file)
+                        item.metadata = render_markdown(item.metadata)  # type: ignore
+                        item["media"] = media_list
+                        items_by_category[category_dir.name].append(item)
+    return index_template.render(items_by_category=items_by_category, category_order=CATEGORY_ORDER)  # type: ignore
 
 
 rendered_html = render_index()

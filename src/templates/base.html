@@ -4,14 +4,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Alex Miller</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      margin: 0;
+    }
+
+    section {
+      margin: 0 1em;
+    }
+
+    h1,
+    h2 {
+      font-size: 1em;
+    }
+
+    #top {
+      border-bottom: 1px solid #000;
+      background-color: white;
+      padding: 0 1em;
+      margin: 0;
+      position: fixed;
+      top: 0;
+      display: block;
+      width: 100%;
+      z-index: 100;
+    }
+
+    #top {
+      display: flex;
+    }
+
+    #top ul {
+      margin: 0;
+    }
+
+    #top li {
+      display: inline;
+      margin-right: 1em;
+    }
+
+    #top a:link,
+    #top a:visited {
+      color: blue;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    #top a:hover {
+      color: black;
+    }
+
+    h1 {
+      margin: 0;
+      padding: 0;
+
+    }
+
+    h2 {
+      padding: 1.2em 0 0 0;
+      position: sticky;
+      top: 0;
+      background: white;
+    }
+
+    #top {
+      flex: 0 0 auto;
+      z-index: 101;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: blue;
+    }
+
+    /* ------------ items -------------- */
+
+    .item .top {
+      display: grid;
+      grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .item::before {
+      content: "";
+      position: absolute;
+      height: 1px;
+      background-color: #e9e9e9;
+      z-index: -100;
+      display: block;
+      width: 100%;
+      margin: 0.5em 0 0 0;
+    }
+
+    .item:hover::before {
+      background-color: black;
+      /* Line changes to red on hover */
+    }
+
+    .item .top span {
+      background-color: white;
+      padding: 0 1em;
+    }
+
+    .item-date span {
+      padding-left: 0 !important;
+    }
+
+    .item .content {
+      display: grid;
+      grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .gallery-section:first-of-type {
+      margin-top: 2em;
+    }
+
+    .gallery-section {
+      display: flex;
+      /* border-bottom: 1px solid #e9e9e9; */
+      margin-bottom: 1em;
+      padding-bottom: 1em;
+    }
+
+    .gallery-section h2 {
+      padding: 0;
+    }
+
+    .gallery-section>.description {
+      min-width: 40ch;
+      width: 40ch;
+      flex-shrink: 0;
+      padding-right: 1em;
+    }
+
+    .gallery-section>.thumbnails {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .gallery-section .description {
+      grid-column: span 4;
+    }
+
+    .gallery-section .description p {
+      margin: 0;
+    }
+
+    .gallery-item {
+      position: relative;
+      height: 200px;
+      margin: 5px;
+    }
+
+    .gallery-item img,
+    .gallery-item video {
+      height: 100%;
+    }
+
+    /* Make sure links maintain the square shape */
+    .gallery-item a {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .row {
+      display: flex;
+      height: 100vh;
+      justify-content: space-between;
+    }
+
+    .previous,
+    .next {
+      width: 200px;
+      flex-shrink: 0;
+    }
+
+    .previous a,
+    .next a {
+      text-decoration: none;
+      text-align: center;
+      height: 100%;
+      width: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .back-to-gallery a {
+      text-decoration: none;
+    }
+
+    /* Add arrows as pseudo-elements */
+    .previous a::after,
+    .next a::after {
+      content: "";
+      display: block;
+      font-size: 2em;
+      line-height: 1;
+    }
+
+    .previous a::after {
+      content: "⟵";
+    }
+
+    .next a::after {
+      content: "⟶";
+    }
+
+    /* Optional: Style for hover state */
+    .previous a:hover,
+    .next a:hover {
+      color: blue;
+    }
+
+    .back-to-gallery,
+    .media-description {
+      text-align: center;
+      flex: 0 0 auto;
+    }
+
+    .back-to-gallery {
+      padding: 2em 0 1em 0;
+    }
+
+    .back-to-gallery a::before {
+      content: "↑";
+      display: block;
+      font-size: 2em;
+      line-height: 1.5;
+      text-decoration: none;
+    }
+
+    .media-container {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inner-media-container {
+      flex: 1 1 auto;
+      /* Grow and shrink as needed */
+      overflow: auto;
+      /* Allow scrolling within if content is too large */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .inner-media-container img,
+    .inner-media-container video {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    .media-description {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 2em;
+    }
+
+    .media-description h2 {
+      padding: 1em 0;
+    }
+
+    .showcase-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2em 0;
+    }
+
+    .showcase-item {
+      margin-bottom: 2em;
+      display: flex;
+      justify-content: center;
+    }
+
+    .showcase-container img,
+    .showcase-container video {
+      max-height: 100vh;
+      max-width: 100%;
+      object-fit: contain;
+    }
+
+    section#reel-video {
+      max-height: 100vh;
+      max-width: 100vw;
+      overflow: hidden;
+    }
+
+    section#reel-video>div {
+      padding: 0;
+      position: relative;
+      aspect-ratio: 16/9;
+      /* Adjust based on your video's aspect ratio */
+      width: 100%;
+      max-height: 100vh;
+    }
+
+    section#reel-video iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      padding: 3em;
+    }
+  </style>
 </head>
 
 <body>
-  <h1>Hello</h1>
-  <%block name="content">
-    <p>Default content goes here</p>
-  </%block>
+  <div id="top">
+    <h1>Alex Miller</h1>
+
+    <ul>
+      <li><a href="/">cv</a></li>
+      <!-- <li><a href="/cv.html">cv</a></li> -->
+      <!-- <li><a href="/projects">projects</a></li> -->
+      <!-- <li><a href="/gallery/finished">gallery</a></li> -->
+      <li><a href="/gallery/in-progress">in progress</a></li>
+      <!-- <li><a href="/contact.html">contact</a></li> -->
+    </ul>
+  </div>
+
+  <%block name="content"></%block>
+
+  <script>
+    function open_item(element, event) {
+      const content = element.parentElement.querySelectorAll('.content')[0];
+      console.log(content.style.display);
+      if (content.style.display == "none") {
+        content.style.display = "block";
+      } else {
+        content.style.display = "none";
+      }
+    }
+  </script>
 </body>
 
 </html>

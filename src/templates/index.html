@@ -2,36 +2,44 @@
 
 <%block name="content">
   <div id="projects">
-    % for item in items:
-    <div class="item">
-      <div class="top">
-        <div class="date">${item.get("date", "")}</div>
-        <div class="title">${item.get("title", "")}</div>
-        <div class="description">${item.get("description", "")}</div>
-        <div class="location">${item.get("location", "")}</div>
-        <div class="collaborators">
-          % if item.get("collaborators"):
-            ${", ".join(item.get("collaborators", ""))}
-          % endif
-        </div>
-      </div>
-      <div class="media">
-        % if item.get("media"):
-          % for media_item in item.get("media"):
-          <div class="media-item">
-            % if media_item.type == "image":
-              <img src="${media_item.thumbnail_path}" />
-            % elif media_item.type == "video":
-              <img src="${media_item.thumbnail_path}" />
-            % endif
+    % for category in category_order:
+      <section>
+        <h2>${category}</h2>
+        % for item in items_by_category.get(category):
+          <div class="item">
+            <div class="top" onclick="open_item(this, event)">
+              <div class="item-date"><span>${item.get("date", "")}</span></div>
+              <div class="item-title"><span>${item.get("title", "")}</span></div>
+              <div class="item-details"><span>${item.get("description", "")}</span></div>
+              <div class="item-location"><span>${item.get("location", "")}</span></div>
+              <div class="collaborators">
+                <span>
+                  % if item.get("collaborators"):
+                    ${", ".join(item.get("collaborators", ""))}
+                  % endif
+                </span>
+              </div>
+            </div>
+            <div class="content" style="display: none">
+              <div class="media">
+                % if item.get("media"):
+                  % for media_item in item.get("media"):
+                  <div class="media-item">
+                    % if media_item.type == "image":
+                      <img src="${media_item.thumbnail_path}" />
+                    % elif media_item.type == "video":
+                      <img src="${media_item.thumbnail_path}" />
+                    % endif
+                  </div>
+                  % endfor
+                % endif
+              </div>
+
+              ${item.content}
+            </div>
           </div>
-          % endfor
-        % endif
-      </div>
-      <div class="content">
-        ${item.content}
-      </div>
-    </div>
+        % endfor
+      </section>
     % endfor
   </div>
 </%block>

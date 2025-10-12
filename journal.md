@@ -5,6 +5,8 @@ todo:
 - resize thumbnail to be right size
 - maybe start on CSS?
 - image / video caching
+- need to order the dates correctly
+- get layout of content + gallery correct
 
 oct 11 2025
 -----------
