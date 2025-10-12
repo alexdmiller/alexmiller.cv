@@ -9,7 +9,11 @@
         <div class="title">${item.get("title", "")}</div>
         <div class="description">${item.get("description", "")}</div>
         <div class="location">${item.get("location", "")}</div>
-        <div class="collaborators">${item.get("collaborators", "")}</div>
+        <div class="collaborators">
+          % if item.get("collaborators"):
+            ${", ".join(item.get("collaborators", ""))}
+          % endif
+        </div>
       </div>
       <div class="media">
         % if item.get("media"):
@@ -18,7 +22,7 @@
             % if media_item.type == "image":
               <img src="${media_item.thumbnail_path}" />
             % elif media_item.type == "video":
-              ${media_item}
+              <img src="${media_item.thumbnail_path}" />
             % endif
           </div>
           % endfor

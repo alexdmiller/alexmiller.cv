@@ -1,3 +1,11 @@
+oct 12 2025
+-----------
+
+todo:
+- resize thumbnail to be right size
+- maybe start on CSS?
+- image / video caching
+
 oct 11 2025
 -----------
 
