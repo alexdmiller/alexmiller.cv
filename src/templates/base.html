@@ -110,12 +110,12 @@
       display: grid;
       grid-column: 2 / -1;
       grid-template-columns: subgrid;
+      padding-bottom: 1em;
     }
 
     .item .content .media .media-item {
       padding: 10px;
-      max-width: 400px;
-      aspect-ratio: 1 / 1;
+      /* aspect-ratio: 1 / 1; */
       /* Make cell square */
       display: flex;
       align-items: center;
@@ -127,7 +127,7 @@
     .item .content .media .media-item img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
       /* Fill square while maintaining aspect ratio */
       object-position: center;
       /* Center the image */

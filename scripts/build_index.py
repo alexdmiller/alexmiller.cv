@@ -109,20 +109,20 @@ def process_video(video_path: Path, reprocess_videos: bool, thumbnail_timestamp:
         resolved_video_output_path.parent.mkdir(parents=True, exist_ok=True)
         (
             ffmpeg.input(str(video_path))
-            .output(
-                str(resolved_video_output_path),
-                vcodec="libx264",  # H.264 codec (widely supported)
-                crf=23,  # Quality (18-28, lower = better quality)
-                preset="medium",  # Encoding speed vs compression
-                acodec="aac",  # AAC audio codec
-                audio_bitrate="128k",  # Audio bitrate
-                movflags="faststart",  # Enable streaming (moves metadata to front)
-                **{
-                    "vf": f"scale=min({FULL_IMAGE_MAX_SIZE[0]}\\,iw):min({FULL_IMAGE_MAX_SIZE[1]}\\,ih):force_original_aspect_ratio=decrease"
-                },
-            )
-            .overwrite_output()
-            .run(capture_stdout=False, capture_stderr=False)
+                .output(
+                    str(resolved_video_output_path),
+                    vcodec="libx264",
+                    crf=23,
+                    preset="medium",
+                    acodec="aac",
+                    audio_bitrate="128k",
+                    movflags="faststart",
+                    **{
+                        "vf": f"scale=min({FULL_IMAGE_MAX_SIZE[0]}\\,iw):min({FULL_IMAGE_MAX_SIZE[1]}\\,ih):force_original_aspect_ratio=decrease,pad=ceil(iw/2)*2:ceil(ih/2)*2"
+                    },
+                )
+                .overwrite_output()
+                .run()
         )
 
     return VideoResult(thumbnail_path=thumbnail_path, video_path=video_output_path)
