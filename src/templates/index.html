@@ -7,7 +7,7 @@
         <h2>${category}</h2>
         % for item in items_by_category.get(category):
           <div class="item">
-            <div class="top" onclick="open_item(this, event)">
+            <div class="top" onclick="openItem(this, event)">
               <div class="item-date"><span>${item.get("date", "")}</span></div>
               <div class="item-title"><span>${item.get("title", "")}</span></div>
               <div class="item-details"><span>${item.get("description", "")}</span></div>
@@ -30,7 +30,9 @@
                   % for media_item in item.get("media"):
                   <div class="media-item">
                     % if media_item.type == "image":
-                      <img src="${media_item.thumbnail_path}" />
+                      <img src="${media_item.thumbnail_path}"
+                          data-image="${media_item.full_image_path}"
+                          onclick="openImage(this)" />
                     % elif media_item.type == "video":
                       <img src="${media_item.thumbnail_path}" />
                     % endif

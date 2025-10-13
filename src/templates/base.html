@@ -99,6 +99,7 @@
       grid-column: 1 / -1;
       grid-template-columns: subgrid;
       margin-bottom: 10px;
+      cursor: pointer;
     }
 
     .item .content {
@@ -106,7 +107,9 @@
     }
 
     .item .content .media {
-      grid-column: 2 / 3;
+      display: grid;
+      grid-column: 2 / -1;
+      grid-template-columns: subgrid;
     }
 
     .item .content .media .media-item {
@@ -116,13 +119,13 @@
 
     .item .content .media .media-item img {
       width: 100%;
+      cursor: zoom-in;
     }
 
     .item .content .description {
       grid-column: 2 / 3;
       padding: 1em;
     }
-
 
     .item::before {
       content: "";
@@ -153,6 +156,54 @@
       display: grid;
       grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
       margin-bottom: 10px;
+    }
+
+
+    /* ------------ popover -------------- */
+    #media-popover {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      cursor: alias;
+    }
+
+    .inner-media {
+      position: relative;
+      display: inline-block;
+    }
+
+    .inner-media img {
+      max-width: calc(100vw - 200px);
+      max-height: calc(100vh - 200px);
+      object-fit: contain;
+      display: block;
+    }
+
+    .left,
+    .right {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+      z-index: 1001;
+    }
+
+    .left {
+      left: 0;
+      cursor: w-resize;
+    }
+
+    .right {
+      right: 0;
+      cursor: e-resize;
     }
 
     .gallery-section:first-of-type {
@@ -372,16 +423,81 @@
 
   <%block name="content"></%block>
 
+  <div id="media-popover" style="display: none;" onclick="closeMedia()">
+    <div class="inner-media">
+      <div class="left" onclick="gotoPreviousMedia(event)"></div>
+      <div class="right" onclick="gotoNextMedia(event)"></div>
+      <img onclick="openMediaClicked(event)" />
+    </div>
+  </div>
+
   <script>
-    function open_item(element, event) {
+    let currentImage;
+
+    function openItem(element, event) {
       const content = element.parentElement.querySelectorAll('.content')[0];
-      console.log(content.style.display);
-      if (content.style.display == "none") {
-        content.style.display = "grid";
+      if (content.style.display == 'none') {
+        content.style.display = 'grid';
       } else {
-        content.style.display = "none";
+        content.style.display = 'none';
       }
     }
+
+    function openImage(element) {
+      currentImage = element;
+      document.querySelector('#media-popover').style.display = 'flex';
+      document.querySelector('#media-popover .inner-media img').src = element.dataset.image;
+    }
+
+    function closeMedia() {
+      document.querySelector('#media-popover').style.display = 'none';
+      document.querySelector('#media-popover .inner-media img').src = "";
+      currentImage = null;
+    }
+
+    function gotoNextMedia(event) {
+      if (event) {
+        event.stopPropagation();
+      }
+
+      if (!currentImage) {
+        return;
+      }
+
+      const nextSibling = currentImage.closest(".media-item").nextElementSibling;
+      if (nextSibling) {
+        openImage(nextSibling.querySelector('img'));
+      } else {
+        closeMedia();
+      }
+    }
+
+    function gotoPreviousMedia(event) {
+      if (event) {
+        event.stopPropagation();
+      }
+
+      if (!currentImage) {
+        return;
+      }
+
+      const previousSibling = currentImage.closest(".media-item").previousElementSibling;
+      if (previousSibling) {
+        openImage(previousSibling.querySelector('img'));
+      } else {
+        closeMedia();
+      }
+    }
+
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') {
+        closeMedia();
+      } else if (event.key === 'ArrowLeft') {
+        gotoPreviousMedia();
+      } else if (event.key === 'ArrowRight') {
+        gotoNextMedia();
+      }
+    });
   </script>
 </body>
 
