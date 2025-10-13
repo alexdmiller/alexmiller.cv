@@ -115,10 +115,22 @@
     .item .content .media .media-item {
       padding: 10px;
       max-width: 400px;
+      aspect-ratio: 1 / 1;
+      /* Make cell square */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      /* Crop overflow if image is larger */
     }
 
     .item .content .media .media-item img {
       width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Fill square while maintaining aspect ratio */
+      object-position: center;
+      /* Center the image */
       cursor: zoom-in;
     }
 

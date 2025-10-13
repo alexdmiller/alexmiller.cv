@@ -1,5 +1,5 @@
 #! python3
-
+import argparse
 import markdown
 from dataclasses import dataclass
 from typing import Literal
@@ -76,7 +76,7 @@ def process_image(image_path: Path) -> ImageResult:
     return ImageResult(thumbnail_path=thumbnail_path, full_image_path=full_path)
 
 
-def process_video(video_path: Path, thumbnail_frame: float = 1) -> VideoResult:
+def process_video(video_path: Path, reprocess_videos: bool, thumbnail_timestamp: float = 0) -> VideoResult:
     thumbnail_path = (
         OUTPUT_PROJECT_DIR
         / video_path.parent.name
@@ -84,10 +84,11 @@ def process_video(video_path: Path, thumbnail_frame: float = 1) -> VideoResult:
     )
     resolved_thumbnail_path = OUTPUT_DIRECTORY / thumbnail_path
 
-    if not resolved_thumbnail_path.exists():
+    if not resolved_thumbnail_path.exists() or reprocess_videos:
+        print("making thumbnail for video", resolved_thumbnail_path)
         resolved_thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
         (
-            ffmpeg.input(str(video_path), ss=thumbnail_frame)
+            ffmpeg.input(str(video_path), ss=thumbnail_timestamp)
             .filter(
                 "scale",
                 f"min({THUMBNAIL_MAX_SIZE[0]},iw)",
@@ -96,7 +97,7 @@ def process_video(video_path: Path, thumbnail_frame: float = 1) -> VideoResult:
             )
             .output(str(resolved_thumbnail_path), vframes=1)
             .overwrite_output()
-            .run(capture_stdout=True, capture_stderr=True)
+            .run(capture_stdout=False, capture_stderr=False)
         )
 
     video_output_path = (
@@ -104,7 +105,7 @@ def process_video(video_path: Path, thumbnail_frame: float = 1) -> VideoResult:
     )
     resolved_video_output_path = OUTPUT_DIRECTORY / video_output_path
 
-    if not resolved_video_output_path.exists():
+    if not resolved_video_output_path.exists() or reprocess_videos:
         resolved_video_output_path.parent.mkdir(parents=True, exist_ok=True)
         (
             ffmpeg.input(str(video_path))
@@ -127,7 +128,7 @@ def process_video(video_path: Path, thumbnail_frame: float = 1) -> VideoResult:
     return VideoResult(thumbnail_path=thumbnail_path, video_path=video_output_path)
 
 
-def process_media(directory: Path) -> list[MediaResult]:
+def process_media(directory: Path, reprocess_videos: bool) -> list[MediaResult]:
     all_results = []
     for file in directory.iterdir():
         if file.is_file():
@@ -135,7 +136,7 @@ def process_media(directory: Path) -> list[MediaResult]:
             if ext in IMAGE_EXTENSIONS:
                 all_results.append(process_image(file))
             elif ext in VIDEO_EXTENSIONS:
-                all_results.append(process_video(file, 10))
+                all_results.append(process_video(file, reprocess_videos, thumbnail_timestamp=0))
     return all_results
 
 
@@ -152,7 +153,7 @@ def render_markdown(value: dict | list | str):
             return html[3:-4]
 
 
-def render_index() -> str:
+def render_index(reprocess_videos: bool) -> str:
     index_template = TEMPLATE_LOOKUP.get_template("index.html")
 
     items_by_category = {}
@@ -162,7 +163,7 @@ def render_index() -> str:
             items_by_category[category_dir.name] = []
             for project_dir in category_dir.iterdir():
                 if project_dir.is_dir():
-                    media_list = process_media(project_dir)
+                    media_list = process_media(project_dir, reprocess_videos)
                     index_file = project_dir / "index.md"
                     with open(index_file) as file:
                         item = frontmatter.load(file)
@@ -173,12 +174,16 @@ def render_index() -> str:
 
     return index_template.render(items_by_category=items_by_category, category_order=CATEGORY_ORDER)  # type: ignore
 
-
-rendered_html = render_index()
-
-with open(OUTPUT_DIRECTORY / OUTPUT_INDEX, "w") as index_file:
-    index_file.write(rendered_html)
-
 # # loop through each directory -- category
 # # loop through each sub directory -- project
 # # find index.md, parse into yaml
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--reprocess-videos', action='store_true', help='Enable verbose output')
+args = parser.parse_args()
+
+rendered_html = render_index(reprocess_videos=args.reprocess_videos)
+
+with open(OUTPUT_DIRECTORY / OUTPUT_INDEX, "w") as index_file:
+    index_file.write(rendered_html)
