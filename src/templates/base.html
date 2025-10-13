@@ -453,14 +453,32 @@
 
   <script>
     let currentImage;
+    let currentItem;
 
     function openItem(element, event) {
-      const content = element.parentElement.querySelectorAll('.content')[0];
-      if (content.style.display == 'none') {
-        content.style.display = 'grid';
-      } else {
-        content.style.display = 'none';
+      if (currentItem) {
+        closeItem(currentItem);
       }
+
+      if (currentItem == element) {
+        currentItem = null;
+        return;
+      }
+
+      const content = element.parentElement.querySelector('.content');
+      content.style.display = 'grid';
+      currentItem = element;
+
+      const offsetTop = element.offsetTop - 40; // 20px offset from top
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      });
+    }
+
+    function closeItem(element) {
+      const content = element.parentElement.querySelector('.content');
+      content.style.display = 'none';
     }
 
     function openMedia(element) {
