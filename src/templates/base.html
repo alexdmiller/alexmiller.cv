@@ -178,9 +178,11 @@
     .inner-media {
       position: relative;
       display: inline-block;
+      cursor: default;
     }
 
-    .inner-media img {
+    .inner-media img,
+    .inner-media video {
       max-width: calc(100vw - 200px);
       max-height: calc(100vh - 200px);
       object-fit: contain;
@@ -190,10 +192,17 @@
     .left,
     .right {
       position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 50%;
+      top: 50%;
+      width: 100px;
+      height: 100px;
       z-index: 1001;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      color: white;
     }
 
     .left {
@@ -201,9 +210,17 @@
       cursor: w-resize;
     }
 
+    .left::before {
+      content: "←";
+    }
+
     .right {
       right: 0;
       cursor: e-resize;
+    }
+
+    .right::before {
+      content: "→";
     }
 
     .gallery-section:first-of-type {
@@ -427,7 +444,10 @@
     <div class="inner-media">
       <div class="left" onclick="gotoPreviousMedia(event)"></div>
       <div class="right" onclick="gotoNextMedia(event)"></div>
-      <img onclick="openMediaClicked(event)" />
+      <img style="display: none;" />
+      <video controls style="display: none;">
+        <source type="video/mp4">
+      </video>
     </div>
   </div>
 
@@ -443,10 +463,26 @@
       }
     }
 
-    function openImage(element) {
-      currentImage = element;
-      document.querySelector('#media-popover').style.display = 'flex';
-      document.querySelector('#media-popover .inner-media img').src = element.dataset.image;
+    function openMedia(element) {
+      const imageElement = document.querySelector('#media-popover .inner-media img')
+      const videoElement = document.querySelector('#media-popover .inner-media video')
+
+      imageElement.src = null;
+      videoElement.src = null;
+      imageElement.style.display = "none";
+      videoElement.style.display = "none";
+
+      if (element.dataset.image) {
+        currentImage = element;
+        document.querySelector('#media-popover').style.display = 'flex';
+        imageElement.style.display = "block";
+        imageElement.src = element.dataset.image;
+      } else if (element.dataset.video) {
+        currentImage = element;
+        document.querySelector('#media-popover').style.display = 'flex';
+        videoElement.style.display = "block";
+        videoElement.src = element.dataset.video;
+      }
     }
 
     function closeMedia() {
@@ -466,7 +502,7 @@
 
       const nextSibling = currentImage.closest(".media-item").nextElementSibling;
       if (nextSibling) {
-        openImage(nextSibling.querySelector('img'));
+        openMedia(nextSibling.querySelector('img'));
       } else {
         closeMedia();
       }
@@ -483,7 +519,7 @@
 
       const previousSibling = currentImage.closest(".media-item").previousElementSibling;
       if (previousSibling) {
-        openImage(previousSibling.querySelector('img'));
+        openMedia(previousSibling.querySelector('img'));
       } else {
         closeMedia();
       }

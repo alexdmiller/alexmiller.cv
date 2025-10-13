@@ -32,9 +32,11 @@
                     % if media_item.type == "image":
                       <img src="${media_item.thumbnail_path}"
                           data-image="${media_item.full_image_path}"
-                          onclick="openImage(this)" />
+                          onclick="openMedia(this)" />
                     % elif media_item.type == "video":
-                      <img src="${media_item.thumbnail_path}" />
+                      <img src="${media_item.thumbnail_path}"
+                          data-video="${media_item.video_path}"
+                          onclick="openMedia(this)" />
                     % endif
                   </div>
                   % endfor
