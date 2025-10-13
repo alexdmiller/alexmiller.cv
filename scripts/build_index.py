@@ -167,8 +167,10 @@ def render_index() -> str:
                     with open(index_file) as file:
                         item = frontmatter.load(file)
                         item.metadata = render_markdown(item.metadata)  # type: ignore
+                        item.content = markdown.markdown(item.content)
                         item["media"] = media_list
                         items_by_category[category_dir.name].append(item)
+
     return index_template.render(items_by_category=items_by_category, category_order=CATEGORY_ORDER)  # type: ignore
 
 

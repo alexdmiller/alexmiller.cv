@@ -21,6 +21,10 @@
               </div>
             </div>
             <div class="content" style="display: none">
+              <div class="description">
+                ${item.content}
+              </div>
+
               <div class="media">
                 % if item.get("media"):
                   % for media_item in item.get("media"):
@@ -34,8 +38,6 @@
                   % endfor
                 % endif
               </div>
-
-              ${item.content}
             </div>
           </div>
         % endfor

@@ -89,12 +89,40 @@
 
     /* ------------ items -------------- */
 
-    .item .top {
+    .item {
       display: grid;
       grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
-      gap: 10px;
+    }
+
+    .item .top {
+      display: grid;
+      grid-column: 1 / -1;
+      grid-template-columns: subgrid;
       margin-bottom: 10px;
     }
+
+    .item .content {
+      grid-column: 1 / -1;
+    }
+
+    .item .content .media {
+      grid-column: 2 / 3;
+    }
+
+    .item .content .media .media-item {
+      padding: 10px;
+      max-width: 400px;
+    }
+
+    .item .content .media .media-item img {
+      width: 100%;
+    }
+
+    .item .content .description {
+      grid-column: 2 / 3;
+      padding: 1em;
+    }
+
 
     .item::before {
       content: "";
@@ -124,7 +152,6 @@
     .item .content {
       display: grid;
       grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
-      gap: 10px;
       margin-bottom: 10px;
     }
 
@@ -350,7 +377,7 @@
       const content = element.parentElement.querySelectorAll('.content')[0];
       console.log(content.style.display);
       if (content.style.display == "none") {
-        content.style.display = "block";
+        content.style.display = "grid";
       } else {
         content.style.display = "none";
       }
