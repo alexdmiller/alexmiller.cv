@@ -2,6 +2,22 @@
 
 <%block name="content">
   <div id="projects">
+    <section>    
+      <h2>featured</h2>
+      <div class="featured">
+        <div id="little-art-piece">////</div>
+        % for item in featured_projects:
+          <div class="featured-item">
+            <img src="${item['thumbnail']}">
+            <div class="featured-title">
+              <div class="item-title">${item.get("title", "")}</div>
+              <div class="item-details">${item.get("description", "")}</div>
+            </div>
+          </div>  
+        % endfor
+      </div>
+    </section>
+
     % for category in category_order:
       <section>
         <h2>${category}</h2>

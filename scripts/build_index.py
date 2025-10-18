@@ -13,6 +13,7 @@ import ffmpeg
 
 PROJECT_DIR = Path("src/projects")
 TEMPLATES_DIR = Path("src/templates")
+FEATURED_PROJECTS = PROJECT_DIR / Path("featured.yaml")
 
 OUTPUT_DIRECTORY = Path("output")
 OUTPUT_PROJECT_DIR = Path("projects")
@@ -157,6 +158,7 @@ def render_index(reprocess_videos: bool) -> str:
     index_template = TEMPLATE_LOOKUP.get_template("index.html")
 
     items_by_category = {}
+    items_by_id = {}
 
     for category_dir in PROJECT_DIR.iterdir():
         if category_dir.is_dir():
@@ -170,9 +172,29 @@ def render_index(reprocess_videos: bool) -> str:
                         item.metadata = render_markdown(item.metadata)  # type: ignore
                         item.content = markdown.markdown(item.content)
                         item["media"] = media_list
+                        item["id"] = f"{category_dir.name}/{project_dir.name}"
                         items_by_category[category_dir.name].append(item)
+                        items_by_id[item["id"]] = item
 
-    return index_template.render(items_by_category=items_by_category, category_order=CATEGORY_ORDER)  # type: ignore
+    featured_projects = []
+
+    with open(FEATURED_PROJECTS, 'r') as file:
+        data = yaml.safe_load(file)
+        for featured_project_data in data:
+            proj_id = featured_project_data["project"]
+            _, proj_name = proj_id.split("/")
+            thumb_image_name = Path(featured_project_data['thumb']).stem
+            resolved_thumbnail_url = OUTPUT_PROJECT_DIR / proj_name / f"{thumb_image_name}_thumbnail.jpeg"
+            featured_projects.append({
+                **items_by_id[proj_id],
+                'thumbnail': resolved_thumbnail_url
+            })
+
+
+    return index_template.render(
+        items_by_category=items_by_category,
+        category_order=CATEGORY_ORDER,
+        featured_projects=featured_projects)  # type: ignore
 
 # # loop through each directory -- category
 # # loop through each sub directory -- project
