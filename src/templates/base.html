@@ -98,23 +98,38 @@
       /* max-width: 100px; */
       padding: 0 1em;
       position: relative;
+      cursor: pointer;
     }
 
     .featured-item img {
       width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
     }
 
     .featured-title {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .featured-item:hover .featured-title::before {
+      background-color: black;
+    }
+
+    .featured-title::before {
       content: "";
+      position: absolute;
       height: 1px;
       background-color: #e9e9e9;
       z-index: -100;
+      display: block;
       width: 100%;
       margin: 0.5em 0 0 0;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    }
+
+    .featured-title:hover::before {
+      background-color: black;
     }
 
     .featured-title div {
@@ -510,12 +525,14 @@
     let currentImage;
     let currentItem;
 
-    function openItem(element, event) {
+    function openItem(id, event, forceOpen) {
+      let element = document.getElementById(id);
+
       if (currentItem) {
         closeItem(currentItem);
       }
 
-      if (currentItem == element) {
+      if (currentItem == element && !forceOpen) {
         currentItem = null;
         return;
       }

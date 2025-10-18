@@ -5,9 +5,10 @@
     <section>    
       <h2>featured</h2>
       <div class="featured">
-        <div id="little-art-piece">////</div>
+        <div id="little-art-piece"></div>
         % for item in featured_projects:
-          <div class="featured-item">
+          <% item_id = item['id'] %>
+          <div class="featured-item" onclick="openItem('${item_id}', event, true)">
             <img src="${item['thumbnail']}">
             <div class="featured-title">
               <div class="item-title">${item.get("title", "")}</div>
@@ -22,8 +23,9 @@
       <section>
         <h2>${category}</h2>
         % for item in items_by_category.get(category):
+          <% item_id = item['id'] %>
           <div class="item">
-            <div class="top" onclick="openItem(this, event)">
+            <div class="top" id="${item['id']}" onclick="openItem('${item_id}', event)">
               <div class="item-date"><span>${item.get("date", "")}</span></div>
               <div class="item-title"><span>${item.get("title", "")}</span></div>
               <div class="item-details"><span>${item.get("description", "")}</span></div>
