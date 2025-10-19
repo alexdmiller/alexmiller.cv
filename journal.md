@@ -1,13 +1,19 @@
+oct 19 2025
+-----------
+
+- fix featured thumbnails / gifs
+- add little art feature
+
 oct 13 2025
 -----------
 
 todo:
-- copy over all the data i have from alex.miller.garden
+x copy over all the data i have from alex.miller.garden
 - left/right arrow hover colors
 - custom "x" for closing gallery view
-- thumbnails should fit better to grid (centered in grid cells?)
+x thumbnails should fit better to grid (centered in grid cells?)
 - use gif for videos? have a play button?
-- fix the vids that aren't working
+x fix the vids that aren't working
 - allow a custom order for media
 - enforce an order for dates
 - update URL when clicking on item, append to history, and when page is loaded process that fragment

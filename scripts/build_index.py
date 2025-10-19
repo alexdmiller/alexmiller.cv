@@ -1,5 +1,6 @@
 #! python3
 import argparse
+import shutil
 import markdown
 from dataclasses import dataclass
 from typing import Literal
@@ -13,10 +14,12 @@ import ffmpeg
 
 PROJECT_DIR = Path("src/projects")
 TEMPLATES_DIR = Path("src/templates")
+STATIC_DIR = Path("src/static")
 FEATURED_PROJECTS = PROJECT_DIR / Path("featured.yaml")
 
 OUTPUT_DIRECTORY = Path("output")
 OUTPUT_PROJECT_DIR = Path("projects")
+OUTPUT_STATIC_DIR = Path("static")
 OUTPUT_INDEX = Path("index.html")
 
 CATEGORY_ORDER = ["works", "talks", "awards", "performances", "press", "curation"]
@@ -182,30 +185,34 @@ def render_index(reprocess_videos: bool) -> str:
         data = yaml.safe_load(file)
         for featured_project_data in data:
             proj_id = featured_project_data["project"]
-            _, proj_name = proj_id.split("/")
-            thumb_image_name = Path(featured_project_data['thumb']).stem
-            resolved_thumbnail_url = OUTPUT_PROJECT_DIR / proj_name / f"{thumb_image_name}_thumbnail.jpeg"
             featured_projects.append({
                 **items_by_id[proj_id],
-                'thumbnail': resolved_thumbnail_url
+                **featured_project_data,
             })
 
-
-    return index_template.render(
+    rendered_html = index_template.render(
         items_by_category=items_by_category,
         category_order=CATEGORY_ORDER,
         featured_projects=featured_projects)  # type: ignore
+    
+    with open(OUTPUT_DIRECTORY / OUTPUT_INDEX, "w") as index_file:
+        index_file.write(rendered_html)
 
-# # loop through each directory -- category
-# # loop through each sub directory -- project
-# # find index.md, parse into yaml
+def copy_static_files():
+    src = STATIC_DIR
+    dst = OUTPUT_DIRECTORY / OUTPUT_STATIC_DIR
+    dst.mkdir(parents=True, exist_ok=True)
+
+    for file in src.glob('**/*'):
+        if file.is_file():
+            rel_path = file.relative_to(src)
+            (dst / rel_path.parent).mkdir(parents=True, exist_ok=True)
+            shutil.copy2(file, dst / rel_path)
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--reprocess-videos', action='store_true', help='Enable verbose output')
 args = parser.parse_args()
 
-rendered_html = render_index(reprocess_videos=args.reprocess_videos)
-
-with open(OUTPUT_DIRECTORY / OUTPUT_INDEX, "w") as index_file:
-    index_file.write(rendered_html)
+render_index(reprocess_videos=args.reprocess_videos)
+copy_static_files()
