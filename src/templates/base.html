@@ -101,7 +101,8 @@
       cursor: pointer;
     }
 
-    .featured-item img {
+    .featured-item img,
+    .featured-item video {
       width: 100%;
       aspect-ratio: 1;
       object-fit: cover;
@@ -111,6 +112,7 @@
       position: relative;
       display: flex;
       justify-content: space-between;
+      margin-top: 1em;
     }
 
     .featured-item:hover .featured-title::before {
@@ -613,6 +615,16 @@
       } else {
         closeMedia();
       }
+    }
+
+    function mouseEnterFeaturedItem(element) {
+      element.querySelector(".no-hover").style.display = 'none';
+      element.querySelector(".hover").style.display = 'block';
+    }
+
+    function mouseLeaveFeaturedItem(element) {
+      element.querySelector(".no-hover").style.display = 'block';
+      element.querySelector(".hover").style.display = 'none';
     }
 
     document.addEventListener('keydown', function (event) {

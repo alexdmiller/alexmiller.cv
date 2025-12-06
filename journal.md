@@ -1,7 +1,13 @@
+dec 6 2025
+----------
+
+todo:
+
+
 oct 19 2025
 -----------
 
-- fix featured thumbnails / gifs
+x fix featured thumbnails / gifs
 - add little art feature
 
 oct 13 2025

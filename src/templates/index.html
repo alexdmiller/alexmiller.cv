@@ -3,13 +3,23 @@
 <%block name="content">
   <div id="projects">
     <section>    
-      <h2>featured</h2>
+      <h2>Featured</h2>
       <div class="featured">
         <div id="little-art-piece"></div>
         % for item in featured_projects:
           <% item_id = item['id'] %>
-          <div class="featured-item" onclick="openItem('${item_id}', event, true)">
-            <img src="${item['thumbnail']}">
+          <div class="featured-item"
+              onclick="openItem('${item_id}', event, true)"
+              onmouseenter="mouseEnterFeaturedItem(this)"
+              onmouseleave="mouseLeaveFeaturedItem(this)">
+            <img class="no-hover" src="${item['thumb']}">
+            % if item.get("hover_image"):
+              <img class="hover" style="display: none" src="${item['hover_image']}">
+            % elif item.get("hover_video"):
+              <video class="hover" style="display: none" autoplay loop muted>
+                <source type="video/mp4" src="${item['hover_video']}">
+              </video>
+            % endif
             <div class="featured-title">
               <div class="item-title">${item.get("title", "")}</div>
               <div class="item-details">${item.get("description", "")}</div>
@@ -21,7 +31,7 @@
 
     % for category in category_order:
       <section>
-        <h2>${category}</h2>
+        <h2>${category.capitalize()}</h2>
         % for item in items_by_category.get(category):
           <% item_id = item['id'] %>
           <div class="item">
@@ -29,13 +39,19 @@
               <div class="item-date"><span>${item.get("date", "")}</span></div>
               <div class="item-title"><span>${item.get("title", "")}</span></div>
               <div class="item-details"><span>${item.get("description", "")}</span></div>
-              <div class="item-location"><span>${item.get("location", "")}</span></div>
+              <div class="item-location">
+                % if item.get("location"):
+                  <span>${item.get("location", "")}</span>
+                % endif
+              </div>
               <div class="collaborators">
-                <span>
-                  % if item.get("collaborators"):
-                    ${", ".join(item.get("collaborators", ""))}
-                  % endif
-                </span>
+                % if item.get("collaborators"):
+                  <span>
+                    % if item.get("collaborators"):
+                      ${", ".join(item.get("collaborators", ""))}
+                    % endif
+                  </span>
+                % endif
               </div>
             </div>
             <div class="content" style="display: none">

@@ -157,7 +157,7 @@ def render_markdown(value: dict | list | str):
             return html[3:-4]
 
 
-def render_index(reprocess_videos: bool) -> str:
+def render_index(reprocess_videos: bool):
     index_template = TEMPLATE_LOOKUP.get_template("index.html")
 
     items_by_category = {}
@@ -178,6 +178,12 @@ def render_index(reprocess_videos: bool) -> str:
                         item["id"] = f"{category_dir.name}/{project_dir.name}"
                         items_by_category[category_dir.name].append(item)
                         items_by_id[item["id"]] = item
+
+            # Sort items in this category by date (newest first)
+            items_by_category[category_dir.name].sort(
+                key=lambda item: item.get("date", ""),
+                reverse=True
+            )
 
     featured_projects = []
 
