@@ -232,7 +232,7 @@
 
     /* ------------ popover -------------- */
     #media-popover {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgb(1, 0, 28);
       position: fixed;
       top: 0;
       left: 0;
@@ -263,12 +263,11 @@
 
     .left,
     .right {
-      position: absolute;
-      top: 50%;
+      position: fixed;
+      top: 0;
+      bottom: 0;
       width: 100px;
-      height: 100px;
       z-index: 1001;
-      transform: translateY(-50%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -278,7 +277,7 @@
     }
 
     .left {
-      left: 0;
+      left: 20px;
       cursor: w-resize;
     }
 
@@ -287,12 +286,17 @@
     }
 
     .right {
-      right: 0;
+      right: 20px;
       cursor: e-resize;
     }
 
     .right::before {
       content: "→";
+    }
+
+    .left:hover,
+    .right:hover {
+      color: blue;
     }
 
     .gallery-section:first-of-type {
@@ -513,9 +517,9 @@
   <%block name="content"></%block>
 
   <div id="media-popover" style="display: none;" onclick="closeMedia()">
+    <div class="left" onclick="gotoPreviousMedia(event)"></div>
+    <div class="right" onclick="gotoNextMedia(event)"></div>
     <div class="inner-media">
-      <div class="left" onclick="gotoPreviousMedia(event)"></div>
-      <div class="right" onclick="gotoNextMedia(event)"></div>
       <img style="display: none;" />
       <video controls style="display: none;">
         <source type="video/mp4">
