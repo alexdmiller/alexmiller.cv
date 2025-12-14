@@ -23,6 +23,7 @@
       font-size: 14px;
       margin: 0;
       padding: 0;
+      font-weight: 400;
     }
 
     section {
@@ -46,7 +47,7 @@
       display: block;
       width: 100%;
       z-index: 100;
-      height: 1.5em;
+      height: 21px;
     }
 
     #top {
@@ -81,10 +82,12 @@
 
     h2 {
       padding: 0 0 0 1em;
-      background: rgb(216, 216, 216);
+      background: black;
+      color: white;
       font-weight: 500;
       margin-top: 0;
-      top: 1.5em;
+      top: 21px;
+      height: 21px;
       position: sticky;
     }
 
@@ -176,10 +179,16 @@
       grid-template-columns: subgrid;
       margin-bottom: 10px;
       cursor: pointer;
+      scroll-margin-top: 42px;
+      position: sticky;
+      top: 42px;
+      background: white;
+      z-index: 1;
     }
 
     .item .content {
       grid-column: 1 / -1;
+      scroll-margin-top: 63px;
     }
 
     .item .content .media {
@@ -212,28 +221,34 @@
 
     .item .content .description {
       grid-column: 2 / 3;
-      padding: 1em;
+      padding: 0.5em;
     }
 
-    .item::before {
+    .item .top::before {
       content: "";
       position: absolute;
       height: 1px;
-      background-color: #e9e9e9;
-      z-index: -100;
+      background-color: black;
+      z-index: -1;
       display: block;
       width: 100%;
       margin: 0.5em 0 0 0;
+      left: 0;
     }
 
-    .item:hover::before {
+    .item .top:hover::before {
       background-color: black;
-      /* Line changes to red on hover */
+      /* Line changes to black on hover */
+    }
+
+    .item .top .item-title {
+      color: blue;
+      font-weight: 400;
     }
 
     .item .top span {
       background-color: white;
-      padding: 0 1em;
+      padding: 0 0.5em;
     }
 
     .item-date span {
@@ -291,6 +306,7 @@
       font-size: 48px;
       font-weight: bold;
       color: white;
+      font-family: 'Times New Roman', Times, serif;
     }
 
     .left {
@@ -564,11 +580,7 @@
       content.style.display = 'grid';
       currentItem = element;
 
-      const offsetTop = element.offsetTop - 40; // 20px offset from top
-      window.scrollTo({
-        top: offsetTop,
-        behavior: 'smooth'
-      });
+      content.scrollIntoView({ behavior: "smooth" });
     }
 
     function closeItem(element) {
