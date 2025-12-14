@@ -50,34 +50,42 @@ class VideoResult:
 MediaResult = ImageResult | VideoResult
 
 
-def process_image(image_path: Path) -> ImageResult:
-    image = Image.open(image_path)
+def process_image(image_path: Path) -> ImageResult | None:
+    try:
+        image = Image.open(image_path)
 
-    thumbnail_path = (
-        OUTPUT_PROJECT_DIR
-        / image_path.parent.name
-        / f"{image_path.stem}_thumbnail.jpeg"
-    )
-    resolved_thumbnail_path = OUTPUT_DIRECTORY / thumbnail_path
+        # Convert palette mode (P) or RGBA to RGB for JPEG compatibility
+        if image.mode in ('P', 'RGBA'):
+            image = image.convert('RGB')
 
-    if not resolved_thumbnail_path.exists():
-        thumbnail_image = image.copy()
-        thumbnail_image.thumbnail(THUMBNAIL_MAX_SIZE, Image.Resampling.LANCZOS)
-        resolved_thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
-        thumbnail_image.save(resolved_thumbnail_path, "JPEG", quality=90, optimize=True)
+        thumbnail_path = (
+            OUTPUT_PROJECT_DIR
+            / image_path.parent.name
+            / f"{image_path.stem}_thumbnail.jpeg"
+        )
+        resolved_thumbnail_path = OUTPUT_DIRECTORY / thumbnail_path
 
-    full_path = (
-        OUTPUT_PROJECT_DIR / image_path.parent.name / f"{image_path.stem}_full.jpeg"
-    )
-    resolved_full_path = OUTPUT_DIRECTORY / full_path
+        if not resolved_thumbnail_path.exists():
+            thumbnail_image = image.copy()
+            thumbnail_image.thumbnail(THUMBNAIL_MAX_SIZE, Image.Resampling.LANCZOS)
+            resolved_thumbnail_path.parent.mkdir(parents=True, exist_ok=True)
+            thumbnail_image.save(resolved_thumbnail_path, "JPEG", quality=90, optimize=True)
 
-    if not resolved_full_path.exists():
-        full_image = image.copy()
-        full_image.thumbnail(FULL_IMAGE_MAX_SIZE, Image.Resampling.LANCZOS)
-        resolved_full_path.parent.mkdir(parents=True, exist_ok=True)
-        full_image.save(resolved_full_path, "JPEG", quality=90, optimize=True)
+        full_path = (
+            OUTPUT_PROJECT_DIR / image_path.parent.name / f"{image_path.stem}_full.jpeg"
+        )
+        resolved_full_path = OUTPUT_DIRECTORY / full_path
 
-    return ImageResult(thumbnail_path=thumbnail_path, full_image_path=full_path)
+        if not resolved_full_path.exists():
+            full_image = image.copy()
+            full_image.thumbnail(FULL_IMAGE_MAX_SIZE, Image.Resampling.LANCZOS)
+            resolved_full_path.parent.mkdir(parents=True, exist_ok=True)
+            full_image.save(resolved_full_path, "JPEG", quality=90, optimize=True)
+
+        return ImageResult(thumbnail_path=thumbnail_path, full_image_path=full_path)
+    except Exception as e:
+        print(f"Warning: Failed to process image '{image_path}': {e}")
+        return None
 
 
 def process_video(video_path: Path, reprocess_videos: bool, thumbnail_timestamp: float = 0) -> VideoResult:
@@ -138,7 +146,9 @@ def process_media(directory: Path, reprocess_videos: bool) -> list[MediaResult]:
         if file.is_file():
             ext = file.suffix.lower()
             if ext in IMAGE_EXTENSIONS:
-                all_results.append(process_image(file))
+                result = process_image(file)
+                if result:
+                    all_results.append(result)
             elif ext in VIDEO_EXTENSIONS:
                 all_results.append(process_video(file, reprocess_videos, thumbnail_timestamp=0))
     return all_results

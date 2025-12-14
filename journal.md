@@ -2,7 +2,17 @@ dec 6 2025
 ----------
 
 todo:
+x fix arrow positions
+x fix background
+- gif previews for videos. play on hover.
+- for short videos w no sound, should autoplay, whereas longer videos or videos w sound should not auto play. maybe there should be a tag in the title like "no-autoplay"
+- for things w/o content, how to handle the UI? no hover state, or grayed out hover state? different cursor?
 
+some specific content focus areas:
+- grid world
+- light quilt text
+- century scale storage needs a view with the whole site and some text
+- game of hope has nothing
 
 oct 19 2025
 -----------
@@ -21,7 +31,7 @@ x thumbnails should fit better to grid (centered in grid cells?)
 - use gif for videos? have a play button?
 x fix the vids that aren't working
 - allow a custom order for media
-- enforce an order for dates
+x enforce an order for dates
 - update URL when clicking on item, append to history, and when page is loaded process that fragment
 - figure out where to put arrows
 
