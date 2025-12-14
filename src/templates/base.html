@@ -224,6 +224,12 @@
       padding: 0.5em;
     }
 
+    .subdescription {
+      display: flex;
+      align-items: flex-end;
+      padding: 0.5em;
+    }
+
     .item .top::before {
       content: "";
       position: absolute;
@@ -607,6 +613,13 @@
         document.querySelector('#media-popover').style.display = 'flex';
         videoElement.style.display = "block";
         videoElement.src = element.dataset.video;
+
+        const isNoLoop = element.dataset.video.includes('noloop');
+        videoElement.loop = !isNoLoop;
+        videoElement.muted = !isNoLoop;
+        if (!isNoLoop) {
+          videoElement.play();
+        }
       }
     }
 

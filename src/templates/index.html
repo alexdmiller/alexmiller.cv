@@ -2,84 +2,87 @@
 
 <%block name="content">
   <div id="projects">
-    <section>    
+    <section>
       <h2>Featured</h2>
       <div class="featured">
         <div id="little-art-piece"></div>
         % for item in featured_projects:
-          <% item_id = item['id'] %>
-          <div class="featured-item"
-              onclick="openItem('${item_id}', event, true)"
-              onmouseenter="mouseEnterFeaturedItem(this)"
-              onmouseleave="mouseLeaveFeaturedItem(this)">
+        <% item_id=item['id'] %>
+          <div class="featured-item" onclick="openItem('${item_id}', event, true)"
+            onmouseenter="mouseEnterFeaturedItem(this)" onmouseleave="mouseLeaveFeaturedItem(this)">
             <img class="no-hover" src="${item['thumb']}">
             % if item.get("hover_image"):
-              <img class="hover" style="display: none" src="${item['hover_image']}">
+            <img class="hover" style="display: none" src="${item['hover_image']}">
             % elif item.get("hover_video"):
-              <video class="hover" style="display: none" autoplay loop muted>
-                <source type="video/mp4" src="${item['hover_video']}">
-              </video>
+            <video class="hover" style="display: none" autoplay loop muted>
+              <source type="video/mp4" src="${item['hover_video']}">
+            </video>
             % endif
             <div class="featured-title">
               <div class="item-title">${item.get("title", "")}</div>
               <div class="item-details">${item.get("description", "")}</div>
             </div>
-          </div>  
-        % endfor
+          </div>
+          % endfor
       </div>
     </section>
 
     % for category in category_order:
-      <section>
-        <h2>${category.capitalize()}</h2>
-        % for item in items_by_category.get(category):
-          <% item_id = item['id'] %>
-          <div class="item">
-            <div class="top" id="${item['id']}" onclick="openItem('${item_id}', event)">
-              <div class="item-date"><span>${item.get("date", "")}</span></div>
-              <div class="item-title"><span>${item.get("title", "")}</span></div>
-              <div class="item-details"><span>${item.get("description", "")}</span></div>
-              <div class="item-location">
-                % if item.get("location"):
-                  <span>${item.get("location", "")}</span>
-                % endif
-              </div>
-              <div class="collaborators">
-                % if item.get("collaborators"):
-                  <span>
-                    % if item.get("collaborators"):
-                      ${", ".join(item.get("collaborators", ""))}
-                    % endif
-                  </span>
-                % endif
-              </div>
+    <section>
+      <h2>${category.capitalize()}</h2>
+      % for item in items_by_category.get(category):
+      <% item_id=item['id'] %>
+        <div class="item">
+          <div class="top" id="${item['id']}" onclick="openItem('${item_id}', event)">
+            <div class="item-date"><span>${item.get("date", "")}</span></div>
+            <div class="item-title"><span>${item.get("title", "")}</span></div>
+            <div class="item-details"><span>${item.get("description", "")}</span></div>
+            <div class="item-location">
+              % if item.get("location"):
+              <span>${item.get("location", "")}</span>
+              % endif
             </div>
-            <div class="content" style="display: none">
-              <div class="description">
-                ${item.content}
-              </div>
-
-              <div class="media">
-                % if item.get("media"):
-                  % for media_item in item.get("media"):
-                  <div class="media-item">
-                    % if media_item.type == "image":
-                      <img src="${media_item.thumbnail_path}"
-                          data-image="${media_item.full_image_path}"
-                          onclick="openMedia(this)" />
-                    % elif media_item.type == "video":
-                      <img src="${media_item.thumbnail_path}"
-                          data-video="${media_item.video_path}"
-                          onclick="openMedia(this)" />
-                    % endif
-                  </div>
-                  % endfor
+            <div class="collaborators">
+              % if item.get("collaborators"):
+              <span>
+                % if item.get("collaborators"):
+                ${", ".join(item.get("collaborators", ""))}
                 % endif
-              </div>
+              </span>
+              % endif
             </div>
           </div>
+          <div class="content" style="display: none">
+            <div class="description">
+              ${item.content}
+            </div>
+
+            % if item.get("subdescription"):
+            <div class="subdescription">
+              <p>${item.get("subdescription")}</p>
+            </div>
+            % endif
+
+
+            <div class="media">
+              % if item.get("media"):
+              % for media_item in item.get("media"):
+              <div class="media-item">
+                % if media_item.type == "image":
+                <img src="${media_item.thumbnail_path}" data-image="${media_item.full_image_path}"
+                  onclick="openMedia(this)" />
+                % elif media_item.type == "video":
+                <img src="${media_item.thumbnail_path}" data-video="${media_item.video_path}"
+                  onclick="openMedia(this)" />
+                % endif
+              </div>
+              % endfor
+              % endif
+            </div>
+          </div>
+        </div>
         % endfor
-      </section>
+    </section>
     % endfor
   </div>
 </%block>
