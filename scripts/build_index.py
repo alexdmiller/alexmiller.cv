@@ -43,6 +43,7 @@ class ImageResult:
 @dataclass
 class VideoResult:
     thumbnail_path: Path
+    thumbnail_video_path: Path
     video_path: Path
     type: Literal["video"] = "video"
 
@@ -112,6 +113,35 @@ def process_video(video_path: Path, reprocess_videos: bool, thumbnail_timestamp:
             .run(capture_stdout=False, capture_stderr=False)
         )
 
+    # Create 1-second preview clip for hover
+    thumbnail_video_path = (
+        OUTPUT_PROJECT_DIR
+        / video_path.parent.name
+        / f"{video_path.stem}_preview.mp4"
+    )
+    resolved_thumbnail_video_path = OUTPUT_DIRECTORY / thumbnail_video_path
+
+    if not resolved_thumbnail_video_path.exists() or reprocess_videos:
+        print("making preview clip for video", resolved_thumbnail_video_path)
+        resolved_thumbnail_video_path.parent.mkdir(parents=True, exist_ok=True)
+        (
+            ffmpeg.input(str(video_path), ss=thumbnail_timestamp, t=1)
+            .output(
+                str(resolved_thumbnail_video_path),
+                vcodec="libx264",
+                crf=28,
+                preset="fast",
+                an=None,  # No audio
+                movflags="faststart",
+                pix_fmt="yuv420p",
+                **{
+                    "vf": f"scale='min({THUMBNAIL_MAX_SIZE[0]},iw)':'min({THUMBNAIL_MAX_SIZE[1]},ih)':force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2"
+                },
+            )
+            .overwrite_output()
+            .run(capture_stdout=False, capture_stderr=False)
+        )
+
     video_output_path = (
         OUTPUT_PROJECT_DIR / video_path.parent.name / f"{video_path.stem}.mp4"
     )
@@ -137,7 +167,7 @@ def process_video(video_path: Path, reprocess_videos: bool, thumbnail_timestamp:
                 .run()
         )
 
-    return VideoResult(thumbnail_path=thumbnail_path, video_path=video_output_path)
+    return VideoResult(thumbnail_path=thumbnail_path, thumbnail_video_path=thumbnail_video_path, video_path=video_output_path)
 
 
 def process_media(directory: Path, reprocess_videos: bool) -> list[MediaResult]:

@@ -72,8 +72,11 @@
                 <img src="${media_item.thumbnail_path}" data-image="${media_item.full_image_path}"
                   onclick="openMedia(this)" />
                 % elif media_item.type == "video":
-                <img src="${media_item.thumbnail_path}" data-video="${media_item.video_path}"
-                  onclick="openMedia(this)" />
+                <div class="video-thumbnail" onclick="openMedia(this)" data-video="${media_item.video_path}"
+                  onmouseenter="playPreview(this)" onmouseleave="stopPreview(this)">
+                  <img src="${media_item.thumbnail_path}" />
+                  <video muted loop src="${media_item.thumbnail_video_path}"></video>
+                </div>
                 % endif
               </div>
               % endfor

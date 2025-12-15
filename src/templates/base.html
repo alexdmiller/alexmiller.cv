@@ -135,14 +135,15 @@
     }
 
     .featured-item:hover .featured-title::before {
-      background-color: black;
+      background-color: blue;
+      height: 5px;
     }
 
     .featured-title::before {
       content: "";
       position: absolute;
       height: 1px;
-      background-color: #e9e9e9;
+      background-color: black;
       z-index: -100;
       display: block;
       width: 100%;
@@ -150,7 +151,8 @@
     }
 
     .featured-title:hover::before {
-      background-color: black;
+      background-color: blue;
+      height: 5px;
     }
 
     .featured-title div {
@@ -159,6 +161,7 @@
 
     .featured-title div:first-child {
       padding-right: 1em;
+      color: blue;
     }
 
     .featured-title div:last-child {
@@ -212,11 +215,48 @@
     .item .content .media .media-item img {
       width: 100%;
       height: 100%;
+      max-height: 400px;
       object-fit: contain;
       /* Fill square while maintaining aspect ratio */
       object-position: center;
       /* Center the image */
       cursor: zoom-in;
+    }
+
+    .video-thumbnail {
+      position: relative;
+      width: 100%;
+      max-height: 400px;
+      cursor: zoom-in;
+    }
+
+    .video-thumbnail img {
+      width: 100%;
+      height: auto;
+      max-height: 400px;
+      display: block;
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .video-thumbnail video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      object-position: center;
+      display: none;
+    }
+
+    .video-thumbnail:hover img {
+      visibility: hidden;
+    }
+
+    .video-thumbnail:hover video {
+      display: block;
     }
 
     .item .content .description {
@@ -241,6 +281,13 @@
       margin: 0.5em 0 0 0;
       left: 0;
     }
+
+
+    .item .top:hover::before {
+      background-color: blue !important;
+      height: 5px;
+    }
+
 
     .item .top:hover::before {
       background-color: black;
@@ -640,7 +687,8 @@
 
       const nextSibling = currentImage.closest(".media-item").nextElementSibling;
       if (nextSibling) {
-        openMedia(nextSibling.querySelector('img'));
+        const mediaElement = nextSibling.querySelector('.video-thumbnail') || nextSibling.querySelector('img');
+        openMedia(mediaElement);
       } else {
         closeMedia();
       }
@@ -657,7 +705,8 @@
 
       const previousSibling = currentImage.closest(".media-item").previousElementSibling;
       if (previousSibling) {
-        openMedia(previousSibling.querySelector('img'));
+        const mediaElement = previousSibling.querySelector('.video-thumbnail') || previousSibling.querySelector('img');
+        openMedia(mediaElement);
       } else {
         closeMedia();
       }
@@ -671,6 +720,22 @@
     function mouseLeaveFeaturedItem(element) {
       element.querySelector(".no-hover").style.display = 'block';
       element.querySelector(".hover").style.display = 'none';
+    }
+
+    function playPreview(element) {
+      const video = element.querySelector('video');
+      if (video) {
+        video.currentTime = 0;
+        video.play();
+      }
+    }
+
+    function stopPreview(element) {
+      const video = element.querySelector('video');
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
     }
 
     document.addEventListener('keydown', function (event) {

@@ -7,3 +7,5 @@ date: "2024"
 collaborators:
   - "[Shelby Wilson](https://shelby.cool)"
 ---
+
+Design and graphics for an editorial essay by [Maxwell Neely-Cohen](https://maxy.world/).
