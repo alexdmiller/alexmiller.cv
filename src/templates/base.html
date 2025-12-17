@@ -82,8 +82,8 @@
 
     h2 {
       padding: 0 0 0 1em;
-      background: black;
-      color: white;
+      background-color: rgb(194, 194, 194);
+      color: black;
       font-weight: 500;
       margin-top: 0;
       top: 21px;
@@ -134,34 +134,37 @@
       margin-top: 1em;
     }
 
-    .featured-item:hover .featured-title::before {
-      background-color: blue;
-      height: 5px;
-    }
-
-    .featured-title::before {
+    .featured-title::before,
+    .item .top::before {
       content: "";
       position: absolute;
       height: 1px;
-      background-color: black;
-      z-index: -100;
+      background-color: rgb(0, 0, 0);
+      z-index: -1;
       display: block;
       width: 100%;
       margin: 0.5em 0 0 0;
+      left: 0;
     }
 
-    .featured-title:hover::before {
-      background-color: blue;
-      height: 5px;
+    .featured-item:hover .featured-title::before,
+    .featured-title:hover::before,
+    .item .top:hover::before {
+      background-color: rgb(0, 0, 0);
+      height: 2px;
     }
 
     .featured-title div {
       background-color: white;
     }
 
+    .featured-title div:first-child,
+    .item .top .item-title {
+      color: rgb(0, 0, 0);
+    }
+
     .featured-title div:first-child {
       padding-right: 1em;
-      color: blue;
     }
 
     .featured-title div:last-child {
@@ -268,35 +271,6 @@
       display: flex;
       align-items: flex-end;
       padding: 0.5em;
-    }
-
-    .item .top::before {
-      content: "";
-      position: absolute;
-      height: 1px;
-      background-color: black;
-      z-index: -1;
-      display: block;
-      width: 100%;
-      margin: 0.5em 0 0 0;
-      left: 0;
-    }
-
-
-    .item .top:hover::before {
-      background-color: blue !important;
-      height: 5px;
-    }
-
-
-    .item .top:hover::before {
-      background-color: black;
-      /* Line changes to black on hover */
-    }
-
-    .item .top .item-title {
-      color: blue;
-      font-weight: 400;
     }
 
     .item .top span {

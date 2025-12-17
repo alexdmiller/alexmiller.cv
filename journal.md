@@ -1,3 +1,15 @@
+dec 14 2025
+-----------
+
+todo:
+- little jitter when you over featured thumbnails
+- need to make a video for light quilt (that isn't for tiktok)
+- mark longer vids that have audio with "no loop"
+- custom vid controls?
+- links in CV view shouldn't open the section
+- different bg color for big view
+- mobile again 
+
 dec 6 2025
 ----------
 
