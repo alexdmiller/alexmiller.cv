@@ -15,7 +15,7 @@ import ffmpeg
 PROJECT_DIR = Path("src/projects")
 TEMPLATES_DIR = Path("src/templates")
 STATIC_DIR = Path("src/static")
-FEATURED_PROJECTS = PROJECT_DIR / Path("featured.yaml")
+SELECTED_PROJECTS = Path("src/selected_projects.yaml")
 
 OUTPUT_DIRECTORY = Path("output")
 OUTPUT_PROJECT_DIR = Path("projects")
@@ -201,45 +201,29 @@ def render_index(reprocess_videos: bool):
     index_template = TEMPLATE_LOOKUP.get_template("index.html")
 
     items_by_category = {}
-    items_by_id = {}
 
-    for category_dir in PROJECT_DIR.iterdir():
-        if category_dir.is_dir():
-            items_by_category[category_dir.name] = []
-            for project_dir in category_dir.iterdir():
-                if project_dir.is_dir():
-                    media_list = process_media(project_dir, reprocess_videos)
-                    index_file = project_dir / "index.md"
-                    with open(index_file) as file:
-                        item = frontmatter.load(file)
-                        item.metadata = render_markdown(item.metadata)  # type: ignore
-                        item.content = markdown.markdown(item.content)
-                        item["media"] = media_list
-                        item["id"] = f"{category_dir.name}/{project_dir.name}"
-                        items_by_category[category_dir.name].append(item)
-                        items_by_id[item["id"]] = item
+    with open(SELECTED_PROJECTS) as file:
+        selected_projects = yaml.safe_load(file)
 
-            # Sort items in this category by date (newest first)
-            items_by_category[category_dir.name].sort(
-                key=lambda item: item.get("date", ""),
-                reverse=True
-            )
+    for category, project_names in selected_projects.items():
+        items_by_category[category] = []
+        for project_name in project_names:
+            project_dir = PROJECT_DIR / category / project_name
+            media_list = process_media(project_dir, reprocess_videos)
+            index_file = project_dir / "index.md"
+            with open(index_file) as file:
+                item = frontmatter.load(file)
+                item.metadata = render_markdown(item.metadata)  # type: ignore
+                item.content = markdown.markdown(item.content)
+                item["media"] = media_list
+                item["id"] = f"{category}/{project_name}"
+                items_by_category[category].append(item)
 
-    featured_projects = []
-
-    with open(FEATURED_PROJECTS, 'r') as file:
-        data = yaml.safe_load(file)
-        for featured_project_data in data:
-            proj_id = featured_project_data["project"]
-            featured_projects.append({
-                **items_by_id[proj_id],
-                **featured_project_data,
-            })
+    category_order = [c for c in CATEGORY_ORDER if c in items_by_category]
 
     rendered_html = index_template.render(
         items_by_category=items_by_category,
-        category_order=CATEGORY_ORDER,
-        featured_projects=featured_projects)  # type: ignore
+        category_order=category_order)  # type: ignore
     
     with open(OUTPUT_DIRECTORY / OUTPUT_INDEX, "w") as index_file:
         index_file.write(rendered_html)

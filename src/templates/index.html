@@ -2,38 +2,12 @@
 
 <%block name="content">
   <div id="projects">
-    <section>
-      <h2>Featured</h2>
-      <div class="featured">
-        <div id="little-art-piece"></div>
-        % for item in featured_projects:
-        <% item_id=item['id'] %>
-          <div class="featured-item" onclick="openItem('${item_id}', event, true)"
-            onmouseenter="mouseEnterFeaturedItem(this)" onmouseleave="mouseLeaveFeaturedItem(this)">
-            <img class="no-hover" src="${item['thumb']}">
-            % if item.get("hover_image"):
-            <img class="hover" style="display: none" src="${item['hover_image']}">
-            % elif item.get("hover_video"):
-            <video class="hover" style="display: none" autoplay loop muted>
-              <source type="video/mp4" src="${item['hover_video']}">
-            </video>
-            % endif
-            <div class="featured-title">
-              <div class="item-title">${item.get("title", "")}</div>
-              <div class="item-details">${item.get("description", "")}</div>
-            </div>
-          </div>
-          % endfor
-      </div>
-    </section>
-
     % for category in category_order:
     <section>
       <h2>${category.capitalize()}</h2>
       % for item in items_by_category.get(category):
-      <% item_id=item['id'] %>
         <div class="item">
-          <div class="top" id="${item['id']}" onclick="openItem('${item_id}', event)">
+          <div class="top" id="${item['id']}">
             <div class="item-date"><span>${item.get("date", "")}</span></div>
             <div class="item-title"><span>${item.get("title", "")}</span></div>
             <div class="item-details"><span>${item.get("description", "")}</span></div>
@@ -52,7 +26,7 @@
               % endif
             </div>
           </div>
-          <div class="content" style="display: none">
+          <div class="content">
             <div class="description">
               ${item.content}
             </div>

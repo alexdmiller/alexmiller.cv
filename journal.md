@@ -1,3 +1,33 @@
+apr 26 2026
+-----------
+
+i think a completionist design that tries to list everything i've ever done isn't that useful
+
+instead i should curate and edit the list to highlight my best achievements, giving more space and explanation to them
+
+
+Works
+
+- Light Quilt
+- Zig Zag
+- Clock Poem
+- Grid World
+- Fantasy Parameter Spaces
+- Century Scale Storage
+- Game of Hope
+- Generative blankets
+- Generative prints
+- The Emergence and Decay of Computation
+- Living Wall
+- High Top-ography
+- ALGOPLEX II
+- ALGOPLEX I
+
+- Untitled A/V performance
+- Morgxn & WALK THE MOON
+
+- 
+
 dec 14 2025
 -----------
 
