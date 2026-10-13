@@ -1,3 +1,12 @@
+oct 12 2026
+-----------
+
+- exploring new layout
+- todo: actually edit content, videos
+- choose nicer banners for videos (can banner be animated?)
+- better play button UI
+- figure out how to present grid world
+
 apr 26 2026
 -----------
 
