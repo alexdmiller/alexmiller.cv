@@ -14,8 +14,11 @@ if [ "$1" = "prod" ]; then
     PROD_MODE=prod
 else
     echo "Running in dev mode - skipping S3 sync and CloudFront invalidation"
-    echo "Starting web server on http://localhost:9090"
-    (cd output && python3 -m http.server 9092) &
+    PORT=9092
+    echo "Starting web server on http://localhost:$PORT"
+    # exec so that $! is the server itself rather than a wrapping subshell,
+    # otherwise the trap below kills the subshell and leaves the server running
+    (cd output && exec python3 -m http.server $PORT) &
     SERVER_PID=$!
     echo "Web server started with PID $SERVER_PID"
 
@@ -35,6 +38,7 @@ do
     node scripts/build-cv.js
     node scripts/build-pages.js
     node scripts/build-showcase.js
+    python3 scripts/build_index.py
 
     if [ "$PROD_MODE" = true ]; then
         echo "Syncing with S3 bucket..."

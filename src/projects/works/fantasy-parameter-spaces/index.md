@@ -8,4 +8,16 @@ collaborators:
   - "Alex Nagy"
   - "[Mick Marchan](https://mkmarchan.github.io/)"
   - "[Peter Whidden](https://peterwhidden.webflow.io/)"
+media:
+  - "black-hole-clip.mov"
+  - "image9.jpg"
+  - "image11.jpg"
+  - "image10.jpg"
+  - "image7.jpg"
+  - "image6.jpg"
+  - "image4.jpg"
+  - "image5.jpg"
+  - "image1.jpg"
+  - "image2.jpg"
+  - "image3.jpg"
 ---

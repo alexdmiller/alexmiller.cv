@@ -1,65 +1,70 @@
 <%inherit file="base.html" />
 
-<%block name="content">
-  <div id="projects">
-    % for category in category_order:
-    <section>
-      <h2>${category.capitalize()}</h2>
-      % for item in items_by_category.get(category):
-        <div class="item">
-          <div class="top" id="${item['id']}">
-            <div class="item-date"><span>${item.get("date", "")}</span></div>
-            <div class="item-title"><span>${item.get("title", "")}</span></div>
-            <div class="item-details"><span>${item.get("description", "")}</span></div>
-            <div class="item-location">
-              % if item.get("location"):
-              <span>${item.get("location", "")}</span>
-              % endif
-            </div>
-            <div class="collaborators">
-              % if item.get("collaborators"):
-              <span>
-                % if item.get("collaborators"):
-                ${", ".join(item.get("collaborators", ""))}
-                % endif
-              </span>
-              % endif
-            </div>
-          </div>
-          <div class="content">
-            <div class="description">
-              ${item.content}
-            </div>
-
-            % if item.get("subdescription"):
-            <div class="subdescription">
-              <p>${item.get("subdescription")}</p>
-            </div>
-            % endif
-
-
-            <div class="media">
-              % if item.get("media"):
-              % for media_item in item.get("media"):
-              <div class="media-item">
-                % if media_item.type == "image":
-                <img src="${media_item.thumbnail_path}" data-image="${media_item.full_image_path}"
-                  onclick="openMedia(this)" />
-                % elif media_item.type == "video":
-                <div class="video-thumbnail" onclick="openMedia(this)" data-video="${media_item.video_path}"
-                  onmouseenter="playPreview(this)" onmouseleave="stopPreview(this)">
-                  <img src="${media_item.thumbnail_path}" />
-                  <video muted loop src="${media_item.thumbnail_video_path}"></video>
-                </div>
-                % endif
-              </div>
-              % endfor
-              % endif
-            </div>
-          </div>
-        </div>
-        % endfor
-    </section>
+<%block name="thumbs">
+  % for category in category_order:
+  % for item in items_by_category.get(category):
+  % if item.get("media"):
+  <div class="thumb-group">
+    % for media_item in item.get("media"):
+    <div class="thumb-row">
+      <button class="thumb" aria-label="Show ${media_item.type}">
+        <img src="${media_item.thumbnail_path}" width="${media_item.width}" height="${media_item.height}"
+          loading="lazy" alt="" />
+      </button>
+      % if media_item.type == "video":
+      <span class="vlabel">VIDEO</span>
+      % endif
+    </div>
     % endfor
   </div>
+  % endif
+  % endfor
+  % endfor
+</%block>
+
+<%block name="feed">
+  % for category in category_order:
+  % for item in items_by_category.get(category):
+  % if item.get("media"):
+  <section class="project" id="${item['id']}">
+    <div class="project-head">
+      <span class="project-title">${item.get("title", "")}</span>
+      <span class="project-date">${item.get("date", "")}</span>
+      <span class="project-location">${item.get("location", "")}</span>
+    </div>
+    % if item.get("collaborators"):
+    <%
+      names = item.get("collaborators")
+      collaborators = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+    %>
+    <div class="project-collaborators">In collaboration with ${collaborators}</div>
+    % endif
+    % for media_item in item.get("media"):
+    <figure class="media-item" style="--w: ${media_item.width}; --h: ${media_item.height}">
+      % if media_item.type == "image":
+      <img class="media" src="${media_item.full_image_path}" width="${media_item.width}" height="${media_item.height}"
+        loading="lazy" alt="" />
+      % elif media_item.duration > 10 or "noloop" in str(media_item.video_path):
+      <div class="media long-video">
+        <video src="${media_item.video_path}" poster="${media_item.thumbnail_path}" playsinline preload="none"></video>
+        <button class="play-btn" aria-label="Play video">
+          <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
+            <circle cx="32" cy="32" r="32" fill="rgba(0, 0, 0, 0.55)" />
+            <path d="M25 19l22 13-22 13z" fill="#fff" />
+          </svg>
+        </button>
+      </div>
+      % else:
+      <video class="media" src="${media_item.video_path}" poster="${media_item.thumbnail_path}" muted loop playsinline
+        preload="none"></video>
+      % endif
+      % if media_item.attribution:
+      <figcaption class="attribution">${media_item.attribution}</figcaption>
+      % endif
+    </figure>
+    % endfor
+  </section>
+  % endif
+  % endfor
+  % endfor
 </%block>

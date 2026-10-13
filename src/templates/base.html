@@ -6,679 +6,553 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alex Miller</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&display=swap"
-    rel="stylesheet">
-
   <style>
+    :root {
+      --header-h: 76px;
+      --panel-w: 88px;
+      --thumb-w: 73px;
+      --feed-w: 840px;
+      --media-gap: 16px;
+      --panel-bg: #efefef;
+      --ink: #111111;
+    }
+
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
-      /* font-family: 'Times New Roman', Times, serif; */
-      /* font-family: "IBM Plex Mono", monospace; */
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      font-size: 14px;
       margin: 0;
-      padding: 0;
-      font-weight: 400;
+      height: 100%;
     }
 
-    section {
-      margin: 0 0 1em 0;
-    }
-
-    h1,
-    h2 {
-      font-size: 1em;
-      z-index: 100;
-    }
-
-    #top {
-      /* border-bottom: 1px solid #000; */
-      /* background-color: blue; */
-      color: black;
-      padding: 0 1em;
-      margin: 0;
-      position: sticky;
-      top: 0;
-      display: block;
-      width: 100%;
-      z-index: 100;
-      height: 21px;
-    }
-
-    #top {
-      display: flex;
-    }
-
-    #top ul {
-      margin: 0;
-    }
-
-    #top li {
-      display: inline;
-      margin-right: 1em;
-    }
-
-    #top a:link,
-    #top a:visited {
-      /* color: white; */
-      text-decoration: none;
-    }
-
-    #top a:hover {
-      color: black;
-      background: white;
-    }
-
-    h1 {
-      margin: 0;
-      padding: 0;
-      font-weight: 600;
-    }
-
-    h2 {
-      padding: 0 0 0 1em;
-      /* background-color: rgb(194, 194, 194); */
-      color: black;
-      font-weight: 500;
-      margin-top: 0;
-      top: 21px;
-      height: 21px;
-      /* position: sticky; */
-    }
-
-    #top {
-      flex: 0 0 auto;
-      z-index: 101;
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 18px;
+      color: var(--ink);
+      background: #fff;
     }
 
     a {
-      color: inherit;
+      color: var(--ink);
     }
 
-    a:hover {
-      text-decoration: underline;
-      color: blue;
-    }
-
-    /* ------------ featured ----------- */
-
-    .featured {
-      display: grid;
-      grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
-      margin: 0 1em;
-    }
-
-    .featured-item {
-      /* max-width: 100px; */
-      padding: 0 1em;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .featured-item img,
-    .featured-item video {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-    }
-
-    .featured-title {
+    .app {
       position: relative;
       display: flex;
-      justify-content: space-between;
-      margin-top: 1em;
+      height: 100dvh;
+      overflow: hidden;
     }
 
-    .featured-title::before,
-    .item .top::before {
-      content: "";
-      position: absolute;
-      height: 1px;
-      background-color: rgb(204, 204, 204);
-      z-index: -1;
-      display: block;
-      width: 100%;
-      margin: 0.5em 0 0 0;
-      left: 0;
+    /* ------------ thumbnail panel (slides out on mobile) ----------- */
+
+    .panel {
+      width: 0;
+      flex-shrink: 0;
+      overflow: hidden;
+      background: var(--panel-bg);
+      transition: width 0.35s ease;
     }
 
-    .featured-title div {
-      background-color: white;
+    .app.open .panel {
+      width: var(--panel-w);
     }
 
-    .featured-title div:first-child,
-    .item .top .item-title {
-      color: rgb(0, 0, 0);
+    .panel-inner {
+      width: var(--panel-w);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
-    .featured-title div:first-child {
-      padding-right: 1em;
-    }
-
-    .featured-title div:last-child {
-      padding-left: 1em;
-    }
-
-    /* ------------ items -------------- */
-
-    .item {
-      display: grid;
-      grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
-      margin: 0 1em;
-    }
-
-    .item .top {
-      display: grid;
-      grid-column: 1 / -1;
-      grid-template-columns: subgrid;
-      margin-bottom: 10px;
-      scroll-margin-top: 42px;
-      /* position: relative; */
-      top: 42px;
-      background: white;
-      z-index: 1;
-    }
-
-    .item .content {
-      grid-column: 1 / -1;
-      scroll-margin-top: 63px;
-    }
-
-    .item .content .media {
-      display: grid;
-      grid-column: 2 / -1;
-      grid-template-columns: subgrid;
-      padding-bottom: 1em;
-    }
-
-    .item .content .media .media-item {
-      padding: 10px;
-      /* aspect-ratio: 1 / 1; */
-      /* Make cell square */
+    .panel-top {
+      height: var(--header-h);
+      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
-      /* Crop overflow if image is larger */
     }
 
-    .item .content .media .media-item img {
-      width: 100%;
-      height: 100%;
-      max-height: 400px;
-      object-fit: contain;
-      /* Fill square while maintaining aspect ratio */
-      object-position: center;
-      /* Center the image */
-      cursor: zoom-in;
+    .close-btn {
+      border: 0;
+      background: transparent;
+      padding: 6px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font: inherit;
+      font-size: 11px;
+      letter-spacing: 0.04em;
+      color: var(--ink);
     }
 
-    .video-thumbnail {
+    .thumbs {
+      /* offsetTop of thumbs is measured against this */
       position: relative;
-      width: 100%;
-      max-height: 400px;
-      cursor: zoom-in;
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: none;
+      /* bottom room so late thumbs can reach the middle */
+      padding: 52px 0 380px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 72px;
     }
 
-    .video-thumbnail img {
-      width: 100%;
-      height: auto;
-      max-height: 400px;
-      display: block;
-      object-fit: contain;
-      object-position: center;
-    }
-
-    .video-thumbnail video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      max-height: 400px;
-      object-fit: contain;
-      object-position: center;
+    .thumbs::-webkit-scrollbar {
       display: none;
     }
 
-    .video-thumbnail:hover img {
-      visibility: hidden;
-    }
-
-    .video-thumbnail:hover video {
-      display: block;
-    }
-
-    .item .content .description {
-      grid-column: 2 / 3;
-      padding: 0.5em;
-    }
-
-    .subdescription {
-      display: flex;
-      align-items: flex-end;
-      padding: 0.5em;
-    }
-
-    .item .top span {
-      background-color: white;
-      padding: 0 0.5em;
-    }
-
-    .item-date span {
-      padding-left: 0 !important;
-    }
-
-    .item .content {
-      display: grid;
-      grid-template-columns: 1fr 4fr 4fr 4fr 4fr;
-      margin-bottom: 10px;
-    }
-
-
-    /* ------------ popover -------------- */
-    #media-popover {
-      background: rgb(1, 0, 28);
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-      cursor: alias;
-    }
-
-    .inner-media {
-      position: relative;
-      display: inline-block;
-      cursor: default;
-    }
-
-    .inner-media img,
-    .inner-media video {
-      max-width: calc(100vw - 200px);
-      max-height: calc(100vh - 200px);
-      object-fit: contain;
-      display: block;
-    }
-
-    .left,
-    .right {
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      width: 100px;
-      z-index: 1001;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 48px;
-      font-weight: bold;
-      color: white;
-      font-family: 'Times New Roman', Times, serif;
-    }
-
-    .left {
-      left: 20px;
-      cursor: w-resize;
-    }
-
-    .left::before {
-      content: "←";
-    }
-
-    .right {
-      right: 20px;
-      cursor: e-resize;
-    }
-
-    .right::before {
-      content: "→";
-    }
-
-    .left:hover,
-    .right:hover {
-      color: blue;
-    }
-
-    .gallery-section:first-of-type {
-      margin-top: 2em;
-    }
-
-    .gallery-section {
-      display: flex;
-      /* border-bottom: 1px solid #e9e9e9; */
-      margin-bottom: 1em;
-      padding-bottom: 1em;
-    }
-
-    .gallery-section h2 {
-      padding: 0;
-    }
-
-    .gallery-section>.description {
-      min-width: 40ch;
-      width: 40ch;
-      flex-shrink: 0;
-      padding-right: 1em;
-    }
-
-    .gallery-section>.thumbnails {
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    .gallery-section .description {
-      grid-column: span 4;
-    }
-
-    .gallery-section .description p {
-      margin: 0;
-    }
-
-    .gallery-item {
-      position: relative;
-      height: 200px;
-      margin: 5px;
-    }
-
-    .gallery-item img,
-    .gallery-item video {
-      height: 100%;
-    }
-
-    /* Make sure links maintain the square shape */
-    .gallery-item a {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    .row {
-      display: flex;
-      height: 100vh;
-      justify-content: space-between;
-    }
-
-    .previous,
-    .next {
-      width: 200px;
-      flex-shrink: 0;
-    }
-
-    .previous a,
-    .next a {
-      text-decoration: none;
-      text-align: center;
-      height: 100%;
-      width: 200px;
+    .thumb-group {
       display: flex;
       flex-direction: column;
+      gap: 10px;
+    }
+
+    .thumb-row {
+      display: flex;
       align-items: center;
-      justify-content: center;
+      gap: 2px;
     }
 
-    .back-to-gallery a {
-      text-decoration: none;
+    .thumb {
+      width: var(--thumb-w);
+      flex-shrink: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+      transition: opacity 0.2s;
     }
 
-    /* Add arrows as pseudo-elements */
-    .previous a::after,
-    .next a::after {
-      content: "";
+    .thumb img {
       display: block;
-      font-size: 2em;
-      line-height: 1;
+      width: 100%;
+      height: auto;
+      outline: 1.5px solid transparent;
+      object-fit: cover;
+      background: #dcdcdc;
     }
 
-    .previous a::after {
-      content: "⟵";
+    .thumb.active img {
+      outline-color: var(--ink);
     }
 
-    .next a::after {
-      content: "⟶";
+    .vlabel {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: 10px;
+      letter-spacing: 0.04em;
     }
 
-    /* Optional: Style for hover state */
-    .previous a:hover,
-    .next a:hover {
-      color: blue;
-    }
+    /* ------------ main column ----------- */
 
-    .back-to-gallery,
-    .media-description {
-      text-align: center;
-      flex: 0 0 auto;
-    }
-
-    .back-to-gallery {
-      padding: 2em 0 1em 0;
-    }
-
-    .back-to-gallery a::before {
-      content: "↑";
-      display: block;
-      font-size: 2em;
-      line-height: 1.5;
-      text-decoration: none;
-    }
-
-    .media-container {
-      height: 100vh;
+    main {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
     }
 
-    .inner-media-container {
-      flex: 1 1 auto;
-      /* Grow and shrink as needed */
-      overflow: auto;
-      /* Allow scrolling within if content is too large */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .inner-media-container img,
-    .inner-media-container video {
-      max-height: 100%;
-      max-width: 100%;
-      object-fit: contain;
-    }
-
-    .media-description {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 2em;
-    }
-
-    .media-description h2 {
-      padding: 1em 0;
-    }
-
-    .showcase-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2em 0;
-    }
-
-    .showcase-item {
-      margin-bottom: 2em;
-      display: flex;
-      justify-content: center;
-    }
-
-    .showcase-container img,
-    .showcase-container video {
-      max-height: 100vh;
-      max-width: 100%;
-      object-fit: contain;
-    }
-
-    section#reel-video {
-      max-height: 100vh;
-      max-width: 100vw;
-      overflow: hidden;
-    }
-
-    section#reel-video>div {
-      padding: 0;
-      position: relative;
-      aspect-ratio: 16/9;
-      /* Adjust based on your video's aspect ratio */
-      width: 100%;
-      max-height: 100vh;
-    }
-
-    section#reel-video iframe {
+    /* floats over the feed with no background, so media scrolls underneath it */
+    header {
       position: absolute;
       top: 0;
       left: 0;
+      right: 0;
+      z-index: 2;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      padding-left: 18px;
+      pointer-events: none;
+    }
+
+    header>* {
+      pointer-events: auto;
+    }
+
+    /* centered on the page rather than the column, so it stays put when the panel opens */
+    .name {
+      position: absolute;
+      top: calc(var(--header-h) / 2);
+      left: 50%;
+      transform: translate(-50%, -50%);
+      line-height: 1.2;
+      font-size: 18px;
+      text-decoration: none;
+      border-bottom: 2px solid #000;
+      white-space: nowrap;
+    }
+
+    .menu-btn {
+      width: 37px;
+      height: 44px;
+      border: 0;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .menu-btn .bar {
+      width: 37px;
+      height: 15px;
+      background: #d9d9d9;
+    }
+
+    .app.open .menu-btn {
+      visibility: hidden;
+    }
+
+    .feed {
+      /* offsetTop of media is measured against this */
+      position: relative;
+      flex: 1;
+      overflow-y: auto;
+      padding: calc(var(--header-h) + 24px) 0 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 56px;
+      transition: padding-left 0.35s ease;
+    }
+
+    .project {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-head {
+      padding: 0 18px;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+      transition: padding-left 0.35s ease;
+    }
+
+    .project-date {
+      display: none;
+    }
+
+    .project-collaborators {
+      padding: 0 18px;
+      margin-bottom: 14px;
+      line-height: 1.2;
+      transition: padding-left 0.35s ease;
+    }
+
+    .project-collaborators a {
+      color: blue;
+      text-decoration: none;
+    }
+
+    .project-collaborators a:hover {
+      text-decoration: underline;
+    }
+
+    /* fills the column, unless that would make the media taller than 90% of the
+       screen; --w / --h are set per item from the media's dimensions */
+    .media-item {
+      width: min(100%, calc(90dvh * var(--w) / var(--h)));
+      margin: 0 auto;
+    }
+
+    .media-item+.media-item {
+      margin-top: var(--media-gap);
+    }
+
+    .feed .media {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: var(--w) / var(--h);
+      object-fit: cover;
+      background: #efefef;
+    }
+
+    .attribution {
+      margin-top: 6px;
+      padding: 0 18px;
+      font-size: 12px;
+      line-height: 1.3;
+      transition: padding-left 0.35s ease;
+    }
+
+    /* videos over 10s: paused with sound until the play button is clicked */
+    .long-video {
+      position: relative;
+    }
+
+    .long-video video {
+      display: block;
       width: 100%;
       height: 100%;
-      padding: 3em;
+      object-fit: cover;
+    }
+
+    .play-btn {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .play-btn[hidden] {
+      display: none;
+    }
+
+    /* ------------ mobile: feed makes room when the panel is open ----------- */
+
+    @media (max-width: 767px) {
+      .app.open .feed {
+        padding-left: 24px;
+      }
+
+      .app.open .project-head,
+      .app.open .project-collaborators,
+      .app.open .attribution {
+        padding-left: 0;
+      }
+    }
+
+    /* ------------ desktop: thumbnails always visible, feed centered ----------- */
+
+    @media (min-width: 768px) {
+      :root {
+        --panel-w: 150px;
+        --thumb-w: 94px;
+        --media-gap: 40px;
+      }
+
+      .panel,
+      .app.open .panel {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1;
+        width: var(--panel-w);
+        background: transparent;
+        transition: none;
+      }
+
+      .panel-top,
+      .menu-btn {
+        display: none;
+      }
+
+      .thumbs {
+        padding: calc(var(--header-h) + 17px) 0 380px 28px;
+        gap: 86px;
+      }
+
+      .thumb-group {
+        gap: 13px;
+      }
+
+      /* inactive thumbs are dimmed until the cursor is over the column */
+      .thumb {
+        opacity: 0.45;
+      }
+
+      .thumb.active,
+      .panel:hover .thumb {
+        opacity: 1;
+      }
+
+      .thumb img {
+        outline-offset: 2px;
+      }
+
+      /* centered on the page; falls back to clearing the panel on narrow windows */
+      .feed {
+        padding: calc(var(--header-h) + 34px) max(var(--panel-w), calc((100% - var(--feed-w)) / 2)) 320px;
+        gap: 110px;
+        transition: none;
+      }
+
+      .project-head {
+        padding: 0;
+        margin-bottom: 16px;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 1em;
+      }
+
+      .project-date {
+        display: block;
+      }
+
+      .project-collaborators {
+        padding: 0;
+        margin: 8px 0 24px;
+      }
+
+      .attribution {
+        padding: 0;
+      }
+
+      .project-location {
+        text-align: right;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div id="top">
-    <h1>Alex Miller</h1>
+  <div class="app" id="app">
+    <aside class="panel" aria-label="Project images">
+      <div class="panel-inner">
+        <div class="panel-top">
+          <button class="close-btn" id="closeBtn" aria-label="Close project menu">
+            <span>CLOSE</span>
+            <svg width="38" height="14" viewBox="0 0 38 14" aria-hidden="true">
+              <path d="M37 7H1M7 1L1 7l6 6" fill="none" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+          </button>
+        </div>
+        <div class="thumbs" id="thumbs">
+          <%block name="thumbs"></%block>
+        </div>
+      </div>
+    </aside>
 
-    <ul>
-      <li><a href="/">cv</a></li>
-      <!-- <li><a href="/cv.html">cv</a></li> -->
-      <!-- <li><a href="/projects">projects</a></li> -->
-      <!-- <li><a href="/gallery/finished">gallery</a></li> -->
-      <li><a href="/gallery/in-progress">in progress</a></li>
-      <!-- <li><a href="/contact.html">contact</a></li> -->
-    </ul>
-  </div>
-
-  <%block name="content"></%block>
-
-  <div id="media-popover" style="display: none;" onclick="closeMedia()">
-    <div class="left" onclick="gotoPreviousMedia(event)"></div>
-    <div class="right" onclick="gotoNextMedia(event)"></div>
-    <div class="inner-media">
-      <img style="display: none;" />
-      <video controls style="display: none;">
-        <source type="video/mp4">
-      </video>
-    </div>
+    <main>
+      <header>
+        <button class="menu-btn" id="menuBtn" aria-label="Open project menu" aria-expanded="false">
+          <span class="bar"></span><span class="bar"></span>
+        </button>
+        <a class="name" href="/">Alex Miller</a>
+      </header>
+      <div class="feed" id="feed">
+        <%block name="feed"></%block>
+      </div>
+    </main>
   </div>
 
   <script>
-    let currentImage;
+    const app = document.getElementById('app');
+    const feed = document.getElementById('feed');       // right column (scrolls)
+    const thumbsEl = document.getElementById('thumbs'); // left column (follows)
+    const menuBtn = document.getElementById('menuBtn');
+    const media = [...feed.querySelectorAll('.media')];      // big images / videos, in order
+    const thumbs = [...thumbsEl.querySelectorAll('.thumb')]; // thumbnail buttons, same order
 
-    function openMedia(element) {
-      const imageElement = document.querySelector('#media-popover .inner-media img')
-      const videoElement = document.querySelector('#media-popover .inner-media video')
+    /* ------------------------------------------------------------------
+       Sync logic.
+       An "anchor" {i, t} says where the middle of the feed sits: between
+       media i and media i+1, a fraction t of the way along. The thumbnail
+       column is scrolled so the same {i, t} lands at its own middle, which
+       makes it glide continuously instead of jumping between thumbs.
+    ------------------------------------------------------------------- */
+    const centers = (els) => els.map((el) => el.offsetTop + el.offsetHeight / 2);
+    const at = (cs, a) => (a.i + 1 < cs.length ? cs[a.i] + a.t * (cs[a.i + 1] - cs[a.i]) : cs[a.i]);
 
-      imageElement.src = null;
-      videoElement.src = null;
-      imageElement.style.display = "none";
-      videoElement.style.display = "none";
-
-      if (element.dataset.image) {
-        currentImage = element;
-        document.querySelector('#media-popover').style.display = 'flex';
-        imageElement.style.display = "block";
-        imageElement.src = element.dataset.image;
-      } else if (element.dataset.video) {
-        currentImage = element;
-        document.querySelector('#media-popover').style.display = 'flex';
-        videoElement.style.display = "block";
-        videoElement.src = element.dataset.video;
-
-        const isNoLoop = element.dataset.video.includes('noloop');
-        videoElement.loop = !isNoLoop;
-        videoElement.muted = !isNoLoop;
-        if (!isNoLoop) {
-          videoElement.play();
-        }
+    function measure() {
+      const rc = centers(media);
+      const c = feed.scrollTop + feed.clientHeight / 2;
+      if (c <= rc[0]) return { i: 0, t: 0 };
+      for (let i = 0; i < rc.length - 1; i++) {
+        if (c < rc[i + 1]) return { i, t: (c - rc[i]) / (rc[i + 1] - rc[i]) };
       }
+      return { i: rc.length - 1, t: 0 };
     }
 
-    function closeMedia() {
-      document.querySelector('#media-popover').style.display = 'none';
-      document.querySelector('#media-popover .inner-media img').src = "";
-      currentImage = null;
+    function syncLeft(a) {
+      thumbsEl.scrollTop = at(centers(thumbs), a) - thumbsEl.clientHeight / 2;
     }
 
-    function gotoNextMedia(event) {
-      if (event) {
-        event.stopPropagation();
-      }
-
-      if (!currentImage) {
-        return;
-      }
-
-      const nextSibling = currentImage.closest(".media-item").nextElementSibling;
-      if (nextSibling) {
-        const mediaElement = nextSibling.querySelector('.video-thumbnail') || nextSibling.querySelector('img');
-        openMedia(mediaElement);
-      } else {
-        closeMedia();
-      }
+    function holdFeed(a) {
+      feed.scrollTop = at(centers(media), a) - feed.clientHeight / 2;
     }
 
-    function gotoPreviousMedia(event) {
-      if (event) {
-        event.stopPropagation();
-      }
-
-      if (!currentImage) {
-        return;
-      }
-
-      const previousSibling = currentImage.closest(".media-item").previousElementSibling;
-      if (previousSibling) {
-        const mediaElement = previousSibling.querySelector('.video-thumbnail') || previousSibling.querySelector('img');
-        openMedia(mediaElement);
-      } else {
-        closeMedia();
-      }
+    let active = -1;
+    function setActive(n) {
+      if (n === active) return;
+      if (thumbs[active]) thumbs[active].classList.remove('active');
+      active = n;
+      thumbs[active].classList.add('active');
     }
 
-    function playPreview(element) {
-      const video = element.querySelector('video');
-      if (video) {
-        video.currentTime = 0;
+    function sync() {
+      if (!media.length) return;
+      const a = measure();
+      syncLeft(a);
+      setActive(Math.min(media.length - 1, a.t < 0.5 ? a.i : a.i + 1));
+    }
+
+    function goTo(i) {
+      feed.scrollTo({ top: centers(media)[i] - feed.clientHeight / 2, behavior: 'smooth' });
+    }
+
+    /* Open/close: the feed narrows while the panel slides in, which would
+       shift the content, so keep the current anchor pinned during the
+       transition. */
+    function toggle() {
+      const anchor = measure();
+      const open = app.classList.toggle('open');
+      menuBtn.setAttribute('aria-expanded', String(open));
+      const start = performance.now();
+      (function step() {
+        holdFeed(anchor);
+        syncLeft(anchor);
+        if (performance.now() - start < 450) requestAnimationFrame(step);
+        else sync();
+      })();
+    }
+
+    thumbs.forEach((btn, i) => btn.addEventListener('click', () => goTo(i)));
+
+    let raf = 0;
+    feed.addEventListener('scroll', () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => { raf = 0; sync(); });
+    }, { passive: true });
+    window.addEventListener('resize', sync);
+    menuBtn.addEventListener('click', toggle);
+    document.getElementById('closeBtn').addEventListener('click', toggle);
+
+    /* Short looping videos play muted, and only while on screen. */
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (isIntersecting) target.play().catch(() => { });
+        else target.pause();
+      });
+    }, { root: feed, threshold: 0.25 });
+    feed.querySelectorAll('video.media[loop]').forEach((video) => videoObserver.observe(video));
+
+    /* Long videos wait for the play button, then play with sound and native
+       controls. They pause when scrolled off screen so audio doesn't linger. */
+    const pauseObserver = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (!isIntersecting) target.pause();
+      });
+    }, { root: feed });
+    feed.querySelectorAll('.long-video').forEach((wrap) => {
+      const video = wrap.querySelector('video');
+      const playBtn = wrap.querySelector('.play-btn');
+      playBtn.addEventListener('click', () => {
+        playBtn.hidden = true;
+        video.controls = true;
         video.play();
-      }
-    }
-
-    function stopPreview(element) {
-      const video = element.querySelector('video');
-      if (video) {
-        video.pause();
-        video.currentTime = 0;
-      }
-    }
-
-    document.addEventListener('keydown', function (event) {
-      if (event.key === 'Escape') {
-        closeMedia();
-      } else if (event.key === 'ArrowLeft') {
-        gotoPreviousMedia();
-      } else if (event.key === 'ArrowRight') {
-        gotoNextMedia();
-      }
+      });
+      pauseObserver.observe(video);
     });
+
+    requestAnimationFrame(sync);
   </script>
 </body>
 

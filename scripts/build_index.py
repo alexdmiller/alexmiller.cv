@@ -1,6 +1,7 @@
 #! python3
 import argparse
 import shutil
+import unicodedata
 import markdown
 from dataclasses import dataclass
 from typing import Literal
@@ -37,6 +38,9 @@ FULL_IMAGE_MAX_SIZE: tuple[int, int] = (1920, 1920)
 class ImageResult:
     thumbnail_path: Path
     full_image_path: Path
+    width: int
+    height: int
+    attribution: str | None = None
     type: Literal["image"] = "image"
 
 
@@ -45,10 +49,20 @@ class VideoResult:
     thumbnail_path: Path
     thumbnail_video_path: Path
     video_path: Path
+    width: int
+    height: int
+    duration: float
+    attribution: str | None = None
     type: Literal["video"] = "video"
 
 
 MediaResult = ImageResult | VideoResult
+
+
+def thumbnail_size(resolved_thumbnail_path: Path) -> tuple[int, int]:
+    # Templates need the aspect ratio to reserve space before media loads
+    with Image.open(resolved_thumbnail_path) as thumbnail:
+        return thumbnail.size
 
 
 def process_image(image_path: Path) -> ImageResult | None:
@@ -83,7 +97,8 @@ def process_image(image_path: Path) -> ImageResult | None:
             resolved_full_path.parent.mkdir(parents=True, exist_ok=True)
             full_image.save(resolved_full_path, "JPEG", quality=90, optimize=True)
 
-        return ImageResult(thumbnail_path=thumbnail_path, full_image_path=full_path)
+        width, height = thumbnail_size(resolved_thumbnail_path)
+        return ImageResult(thumbnail_path=thumbnail_path, full_image_path=full_path, width=width, height=height)
     except Exception as e:
         print(f"Warning: Failed to process image '{image_path}': {e}")
         return None
@@ -167,20 +182,61 @@ def process_video(video_path: Path, reprocess_videos: bool, thumbnail_timestamp:
                 .run()
         )
 
-    return VideoResult(thumbnail_path=thumbnail_path, thumbnail_video_path=thumbnail_video_path, video_path=video_output_path)
+    width, height = thumbnail_size(resolved_thumbnail_path)
+    return VideoResult(
+        thumbnail_path=thumbnail_path,
+        thumbnail_video_path=thumbnail_video_path,
+        video_path=video_output_path,
+        width=width,
+        height=height,
+        duration=float(ffmpeg.probe(str(resolved_video_output_path))["format"]["duration"]),
+    )
 
 
-def process_media(directory: Path, reprocess_videos: bool) -> list[MediaResult]:
+def normalize_filename(name: str) -> str:
+    # macOS can hand back decomposed unicode filenames; compare in one form
+    return unicodedata.normalize("NFC", name)
+
+
+def process_media(directory: Path, reprocess_videos: bool, media_spec: list | None = None) -> list[MediaResult]:
+    """Process a project's media in the order given by the `media` list in its
+    index.md frontmatter. Each entry is either a filename or a mapping:
+
+        media:
+          - first.jpg
+          - file: second.mp4
+            attribution: "Video by [Someone](https://example.com)"
+
+    Files in the directory that aren't listed are appended, sorted by filename.
+    """
+    files = {
+        normalize_filename(file.name): file
+        for file in sorted(directory.iterdir())
+        if file.is_file() and file.suffix.lower() in IMAGE_EXTENSIONS | VIDEO_EXTENSIONS
+    }
+
+    ordered: list[tuple[Path, str | None]] = []
+    for entry in media_spec or []:
+        name, attribution = (entry.get("file"), entry.get("attribution")) if isinstance(entry, dict) else (entry, None)
+        file = files.pop(normalize_filename(str(name)), None)
+        if file is None:
+            print(f"Warning: '{name}' is listed in {directory / 'index.md'} but is missing (or listed twice)")
+            continue
+        ordered.append((file, attribution))
+    if media_spec and files:
+        print(f"Note: media not listed in {directory / 'index.md'}, appended at the end: {', '.join(files)}")
+    ordered += [(file, None) for file in files.values()]
+
     all_results = []
-    for file in directory.iterdir():
-        if file.is_file():
-            ext = file.suffix.lower()
-            if ext in IMAGE_EXTENSIONS:
-                result = process_image(file)
-                if result:
-                    all_results.append(result)
-            elif ext in VIDEO_EXTENSIONS:
-                all_results.append(process_video(file, reprocess_videos, thumbnail_timestamp=0))
+    for file, attribution in ordered:
+        if file.suffix.lower() in IMAGE_EXTENSIONS:
+            result = process_image(file)
+        else:
+            result = process_video(file, reprocess_videos, thumbnail_timestamp=0)
+        if result:
+            if attribution:
+                result.attribution = render_markdown(str(attribution))
+            all_results.append(result)
     return all_results
 
 
@@ -209,10 +265,11 @@ def render_index(reprocess_videos: bool):
         items_by_category[category] = []
         for project_name in project_names:
             project_dir = PROJECT_DIR / category / project_name
-            media_list = process_media(project_dir, reprocess_videos)
             index_file = project_dir / "index.md"
             with open(index_file) as file:
                 item = frontmatter.load(file)
+                # filenames must not go through markdown, so take the media list out first
+                media_list = process_media(project_dir, reprocess_videos, item.metadata.pop("media", None))
                 item.metadata = render_markdown(item.metadata)  # type: ignore
                 item.content = markdown.markdown(item.content)
                 item["media"] = media_list

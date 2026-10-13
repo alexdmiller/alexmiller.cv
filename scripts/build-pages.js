@@ -10,14 +10,11 @@ const { promisify } = require("util");
 const writeFile = promisify(fs.writeFile);
 
 // List of pages to build - add new pages here
+// (output/index.html is built by scripts/build_index.py from src/templates/)
 const PAGES = [
   {
     inputFile: "src/reel.html",
     outputFile: "output/reel.html",
-  },
-  {
-    inputFile: "src/index.html",
-    outputFile: "output/index.html",
   },
 ];
 

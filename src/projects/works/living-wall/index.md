@@ -6,4 +6,6 @@ location: "[Vida apartment building](https://g.page/vida-apartments-seattle?shar
 date: "2018"
 collaborators:
   - "[Peter Whidden](https://peterwhidden.webflow.io/)"
+media:
+  - "living_wall_—_seattle,_wa (2160p)(1).mp4"
 ---

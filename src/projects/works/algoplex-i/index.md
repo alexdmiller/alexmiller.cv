@@ -6,6 +6,12 @@ date: "2017"
 collaborators:
   - "Alex Nagy"
   - <a href="https://mkmarchan.github.io/">Mick Marchan</a>
+media:
+  - "hd-30.jpg"
+  - "hd-35.jpg"
+  - "hd-34.jpg"
+  - "hd-11.jpg"
+  - "hd-13.jpg"
 ---
 
 _Algoplex I_ is an interactive installation that presents the viewer with an opportunity to explore an algorithmic playground using a custom made controller – the "Light Cube". As users twist and turn the Light Cube, the cube and projected visuals react with light and sound changes.
